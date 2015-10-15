@@ -1,2 +1,2 @@
 # CochlearNerveFHModel
-Computational model based off of the Frankenhaeuser-Huxley equations to simulate the effects of demyelination on cochlear neurons. 
+Computational model based off of the Frankenhaeuser-Huxley equations to simulate the effects of demyelination on cochlear neurons in humans. Modified from the model by Hirabayashi, Naghavian, and Manouchehri, "Modeling Subcutaneous Stimulation of Spinal Cord for Neuropathic Pain Treatment," 132.239.25.6
