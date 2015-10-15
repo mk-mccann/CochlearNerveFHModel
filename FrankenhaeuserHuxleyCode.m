@@ -47,80 +47,86 @@
         alpha_p = @(V) (A7*(V-B7))/(1-exp((B7-V)/C7));
         beta_p  = @(V) (A8*(B8-V))/(1-exp((V-B8)/C8));
         
-        alpha_r = 5;   % [m/M*ms]
+        alpha_r = 5;    % [m/M*ms]
         beta_r  = 0.18;
-        T_max   = 1.5; % [mM]
-        K_p     = 5;   % [mV]
-        V_p     = 7;   % [mV]
+        T_max   = 1.5;  % [mM]
+        K_p     = 5;    % [mV]
+        V_p     = 7;    % [mV]
         E_Cl    = -80;
-        T_max   = 1;   % [mM]
-        K_p     = 5;   % [mV]
-        V_p     = 7;   % [mV]
+        T_max   = 1;    % [mM]
+        K_p     = 5;    % [mV]
+        V_p     = 7;    % [mV]
         conc_T  = @(V) T_max./(1+exp(-(V-V_p)./K_p));
         g_GABA  = .045;
-% Membrane currents (in uA/cm^2) HH
-J_Na = @(V,m,h) g_Na .* m.^2*h*(V - E_Na);
-J_K = @(V,n) g_K .* n.^2 .* (V - E_K);
-J_L = @(V) g_L .* (V - E_L);
-J_P = @(V,p) p^2*g_P*(V-E_Na);
-J_GABA= @(V,r) g_GABA*r*(V-E_Cl);
-J_ext=0;
-%Initial Conditions
-m0=0.0005;
-h0=0.8249;
-n0=0.0268;
-p0=0.0049;
-V0=-70;
-%time vector s
-t_start = 0;
-t_stop =100;
-t_step = 1;
-%differential gating equations
-dmdt=@(V,m) alpha_m(V)*(1-m)-beta_m(V)*m;
-dhdt=@(V,h) alpha_h(V)*(1-h)-beta_h(V)*h;
-dndt=@(V,n) alpha_n(V)*(1-n)-beta_n(V)*n;
-dpdt=@(V,p) alpha_p(V)*(1-p)-beta_p(V)*p;
-dVdt=@(V,m,h,n,p,r) ((J_ext-J_Na(V,m,h)-J_K(V,n)-J_L(V)-J_P(V,p)))/C_m;
-dmdt2=@(V,m) alpha_m(V)*(1-m)-beta_m(V)*m;
-dhdt2=@(V,h) alpha_h(V)*(1-h)-beta_h(V)*h;
-dndt2=@(V,n) alpha_n(V)*(1-n)-beta_n(V)*n;
-dpdt2=@(V,p) alpha_p(V)*(1-p)-beta_p(V)*p;
-drdt2=@(V,r) alpha_r.*(T_max./(1+exp(-(V-V_p)./K_p))).*(1-r)-beta_r.*r;
-dVdt2=@(V,m,h,n,p,r) (J_ext-J_Na(V,m,h)-J_K(V,n)-J_L(V)-J_P(V,p)-J_GABA(V,r))/C_m;
-IC=[V0 m0 h0 n0 p0 V0 m0 h0 n0 p0 8.7e-7];
-dxdt = @(t, x) ...
- [ ...
- dVdt(x(1,:),x(2,:),x(3,:),x(4,:),x(5,:)); ...
- dmdt(x(1,:),x(2,:)); ...
- dhdt(x(1,:),x(3,:)); ...
- dndt(x(1,:),x(4,:)); ...
- dpdt(x(1,:),x(5,:));...
- dVdt2(x(6,:),x(7,:),x(8,:),x(9,:),x(10,:), x(11,:)); ...
- dmdt2(x(6,:),x(7,:)); ...
- dhdt2(x(6,:),x(8,:)); ...
- dndt2(x(6,:),x(9,:)); ...
- dpdt2(x(6,:),x(10,:));...
- drdt2(x(1,:),x(11,:));];
-[t, x] = ode23(dxdt, t_start:t_step:t_stop, IC);
-V = x(:,1); % the first column is the V values
-m = x(:,2); % the second column is the m values
-h = x(:,3); % the second column is the h values
-n = x(:,4); % the second column is the h values
-p = x(:,5); % the second column is the p values
-V2 = x(:,6); % the first column is the V values
-m2 = x(:,7); % the second column is the m values
-h2 = x(:,8); % the second column is the h values
-n2 = x(:,9); % the second column is the h values
-p2 = x(:,10); % the second column is the p values
-r = x(:,10); % the second column is the p values
-figure()
-plot(t,V)
-hold on
-plot(t,V2, 'r')
-ylim([0 60])
-xlabel('t (ms)')
-ylabel('Vm (nV)')
-title('FH Point Nuerons: Inhibitory Junction')
-hold off
-figure()
-plot( t,r)
+    % Membrane currents (HH) - [uA/cm^2]
+        J_Na   = @(V,m,h) g_Na .* m.^2*h*(V - E_Na);
+        J_K    = @(V,n) g_K .* n.^2 .* (V - E_K);
+        J_L    = @(V) g_L .* (V - E_L);
+        J_P    = @(V,p) p^2*g_P*(V-E_Na);
+        J_GABA = @(V,r) g_GABA*r*(V-E_Cl);
+        J_ext  = 0;
+    % Initial Conditions:
+        m0 = 0.0005;
+        h0 = 0.8249;
+        n0 = 0.0268;
+        p0 = 0.0049;
+        V0 = -70;
+    % Time Vector - [s]
+        t_start = 0;
+        t_stop  = 100;
+        t_step  = 1;
+    % Differential Gating Equations
+        dmdt  = @(V,m) alpha_m(V)*(1-m)-beta_m(V)*m;
+        dhdt  = @(V,h) alpha_h(V)*(1-h)-beta_h(V)*h;
+        dndt  = @(V,n) alpha_n(V)*(1-n)-beta_n(V)*n;
+        dpdt  = @(V,p) alpha_p(V)*(1-p)-beta_p(V)*p;
+        dVdt  = @(V,m,h,n,p,r) ((J_ext-J_Na(V,m,h)-J_K(V,n)-J_L(V)-...
+                J_P(V,p)))/C_m;
+        dmdt2 = @(V,m) alpha_m(V)*(1-m)-beta_m(V)*m;
+        dhdt2 = @(V,h) alpha_h(V)*(1-h)-beta_h(V)*h;
+        dndt2 = @(V,n) alpha_n(V)*(1-n)-beta_n(V)*n;
+        dpdt2 = @(V,p) alpha_p(V)*(1-p)-beta_p(V)*p;
+        drdt2 = @(V,r) alpha_r.*(T_max./(1+exp(-(V-V_p)./K_p))).*(1-...
+                r)-beta_r.*r;
+        dVdt2 = @(V,m,h,n,p,r) (J_ext-J_Na(V,m,h)-J_K(V,n)-J_L(V)-...
+                J_P(V,p)-J_GABA(V,r))/C_m;
+        IC    = [V0 m0 h0 n0 p0 V0 m0 h0 n0 p0 8.7e-7];
+
+        dxdt = @(t, x)[ ...
+                 dVdt(x(1,:),x(2,:),x(3,:),x(4,:),x(5,:)); ...
+                 dmdt(x(1,:),x(2,:)); ...
+                 dhdt(x(1,:),x(3,:)); ...
+                 dndt(x(1,:),x(4,:)); ...
+                 dpdt(x(1,:),x(5,:));...
+                 dVdt2(x(6,:),x(7,:),x(8,:),x(9,:),x(10,:), x(11,:)); ...
+                 dmdt2(x(6,:),x(7,:)); ...
+                 dhdt2(x(6,:),x(8,:)); ...
+                 dndt2(x(6,:),x(9,:)); ...
+                 dpdt2(x(6,:),x(10,:));...
+                 drdt2(x(1,:),x(11,:));];
+              
+        [t, x] = ode23(dxdt, t_start:t_step:t_stop, IC);
+        V      = x(:,1);  % the first column is the V values
+        m      = x(:,2);  % the second column is the m values
+        h      = x(:,3);  % the second column is the h values
+        n      = x(:,4);  % the second column is the h values
+        p      = x(:,5);  % the second column is the p values
+        V2     = x(:,6);  % the first column is the V values
+        m2     = x(:,7);  % the second column is the m values
+        h2     = x(:,8);  % the second column is the h values
+        n2     = x(:,9);  % the second column is the h values
+        p2     = x(:,10); % the second column is the p values
+        r      = x(:,10); % the second column is the p values
+
+    figure(1); clf;
+    plot(t,V)
+    hold on
+    plot(t,V2, 'r')
+    % ylim([0 60])
+    xlabel('t (ms)')
+    ylabel('Vm (nV)')
+    title('FH Point Nuerons: Inhibitory Junction')
+    hold off
+    
+    figure(2); clf;
+    plot(t,r)
