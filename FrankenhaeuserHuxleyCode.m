@@ -1,11 +1,14 @@
 %% BME 504 Final Project - Frankenhaeuser-Huxley Model
     % Lauren Heckelman, Matthew McCann, and Michelle Mueller
+    % Modified from Hirabayashi, Naghavian, and Manouchehri, "Modeling
+    % Subcutaneous Stimulation of Spinal Cord for Neuropathic Pain Treatment"
+    % 132.239.25.6
     
 %% Initialize the Workspace:
     close all;clear all; clc
     
 %% Constants:
-    C_m = 2.0;  % membrane capacitance, in uF/cm^2
+    C_m = 2.0;  % membrane capacitance, in uF/cm^2$
     V_t = 26.7;
     % Ion concentrations - [mM]
         C_o_Na = 114;
@@ -118,6 +121,8 @@
         p2     = x(:,10); % the second column is the p values
         r      = x(:,10); % the second column is the p values
 
+        
+        
     figure(1); clf;
     plot(t,V)
     hold on
