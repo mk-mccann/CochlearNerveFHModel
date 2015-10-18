@@ -12,8 +12,6 @@
     % and
     %
     
-    %http://people.ece.cornell.edu/land/PROJECTS/BioNB222section/StudentWork/AmieTettemer/Mye.txt
-    
 %% Initialize the Workspace:
     close all;clear all; clc
     
@@ -70,13 +68,13 @@
         K_p     = 5;    % [mV]
         V_p     = 7;    % [mV]
         conc_T  = @(V) T_max./(1+exp(-(V-V_p)./K_p));
-        %g_GABA  = .045;
+        g_GABA  = .045;
     % Membrane currents (HH) - [uA/cm^2]
         J_Na   = @(V,m,h) g_Na .* m.^2*h*(V - E_Na);
         J_K    = @(V,n) g_K .* n.^2 .* (V - E_K);
         J_L    = @(V) g_L .* (V - E_L);
         J_P    = @(V,p) p^2*g_P*(V-E_Na);
-        %J_GABA = @(V,r) g_GABA*r*(V-E_Cl);
+        J_GABA = @(V,r) g_GABA*r*(V-E_Cl);
         J_ext  = 0;
     % Initial Conditions:
         m0 = 0.0005;
@@ -102,7 +100,7 @@
         drdt2 = @(V,r) alpha_r.*(T_max./(1+exp(-(V-V_p)./K_p))).*(1-...
                 r)-beta_r.*r;
         dVdt2 = @(V,m,h,n,p,r) (J_ext-J_Na(V,m,h)-J_K(V,n)-J_L(V)-...
-                J_P(V,p))/C_m;
+                J_P(V,p)-J_GABA(V,r))/C_m;
         IC    = [V0 m0 h0 n0 p0 V0 m0 h0 n0 p0 8.7e-7];
 
         dxdt = @(t, x)[ ...
