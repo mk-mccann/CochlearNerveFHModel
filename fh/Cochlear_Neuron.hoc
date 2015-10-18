@@ -1,0 +1,123 @@
+/* Frankenhaeuser-Huxley model of the cochlear nerve.
+Authors: Lauren Heckelman, Matthew McCann, and Michelle Meuller.
+
+This code is modified from the work by Michael Hines, which describes the FH equation given in the original Frankenhaeuser-Huxley paper. Spiral ganglion cell membrane parameters taken from Frijns, de Snoo, and Shoonhoven (1995), and Cartee (2006).
+
+
+References:
+
+[1] Frankenhaeuser, B. and Huxley, A. F. (1964)
+The action potential in the myelinated nerve fibre of  Xenoupus Laevis
+as computed on the basis of voltage clamp data.
+J. Physiol. 171: 302-315
+
+[2] Hines, Michael. Xenopus Myelinated Neuron (Frankenhaeuser, Huxley 1964). From http://senselab.med.yale.edu/ModelDB/showModel.cshtml?model=3507
+
+[3] Frijns, J.H.M, de Snoo, S.L., and Schoonhoven, R. (1995) Potential distributions and neural excitation patterns in a rotationally symmetric model of the electrically stimulated cochlea. Hearing Research 87: 170-186
+
+[4] Cartee, Lianne, A. (2006). Spiral ganglion cell site of excitation II: Numerical model analysis. ￼￼Hearing Research 215: 22–30
+
+*/
+
+load_file("nrngui.hoc")
+
+// ----------------------- Global Variables --------------------------------- //
+
+rhoa = 110      // axial resistivity (ohm-cm)
+Vo = -65        //initial potential
+
+// Dendrite ------------------------------------------------------------------
+D_den = 3             // fiber diameter in um
+N_NODES_den = 5       // number of nodes
+INL_dend = 175        // internodal length in um
+
+// Soma ----------------------------------------------------------------------
+D_soma = 10           // fiber diameter in um
+N_NODES_soma = 1      // number of nodes
+INL = 20              // internodal length in um
+
+// Axon -----------------------------------------------------------------------
+D_axon = 3            // fiber diameter in um
+N_NODES_axon = 21     // number of nodes
+INL_axon = 100*D_axon      // internodal length in um
+
+// Stimulus
+PW = 0.1              // pulse width in ms
+DELAY = 1             //in ms
+E2F_DIST = 1          //electrode to fiber distance in mm
+AMPLITUDE = -4e-1     //cathodic, check units!
+tstop = 10
+dt = 0.001
+
+// Medium
+sigma_e = 2e-4 //S/mm
+
+// ----------------------- Creating Axon -------------------------------------
+create axnode[N_NODES_axon]
+// initializing axon
+proc initialize(){
+  for i=0, N_NODES_axon-1 {
+		axnode[i]{
+			nseg = 1
+			diam = 0.7*D_axon  // node diameter (um)
+			L    = 1		 // node length (um)
+			Ra   = rhoa*( (L + INL_axon) / L )  // trick to account for internodal resistance
+			cm   = 2					   // specific membrane capacitance (uF/cm^2)
+      insert fh
+          nai=10  nao=142  ki=141 ko=4.2   // [mM]
+      insert pas
+        g_pas = 1/2000
+	  insert extracellular   // for extracellular stimulation
+		}
+	}
+
+  for i=0, N_NODES-2 {
+		connect node[i](1), node[i+1](0)
+  }
+	finitialize(Vo)
+}
+initialize()
+
+// ----------------------- Creating Soma -------------------------------------
+create somanode[N_NODES_soma]
+// initializing axon
+proc initialize(){
+	nseg = 1
+	diam = 0.7*D_soma  // node diameter (um)
+	L    = 50		 // node length (um)
+	Ra   = rhoa*( (L + INL_soma) / L )  // trick to account for internodal resistance
+    cm   = 2					   // specific membrane capacitance (uF/cm^2)
+    insert fh
+        nai=10  nao=142  ki=141 ko=4.2   // [mM]
+    insert pas
+      g_pas = 1/2000
+    insert extracellular   // for extracellular stimulation
+	finitialize(Vo)
+}
+initialize()
+
+// ----------------------- Creating Dendrite -------------------------------------
+create dendnode[N_NODES]
+// initializing axon
+proc initialize(){
+  for i=0, N_NODES_den-1 {
+		dendnode[i]{
+			nseg = 1
+			diam = 0.7*D  // node diameter (um)
+			L    = 1		 // node length (um)
+			Ra   = rhoa*( (L + INL_dend) / L )  // trick to account for internodal resistance
+			cm   = 2					   // specific membrane capacitance (uF/cm^2)
+      insert fh
+            nai=10  nao=142  ki=141 ko=4.2   // [mM]
+      insert pas
+            g_pas = 1/2000
+	  insert extracellular   // for extracellular stimulation
+		}
+	}
+
+  for i=0, N_NODES-2 {
+		connect node[i](1), node[i+1](0)
+  }
+	finitialize(Vo)
+}
+initialize()
