@@ -1,4 +1,7 @@
-%% 
+%% FH_Volume_Cnductor
+% Lauren Heckelman, Matthew McCann, and Michelle Mueller
+
+% Adapted from the code by Adie Adams of Cornell University. 
 
 %----------------------------------------------------------------------
 %Modified by Amie Adams
