@@ -51,7 +51,7 @@ dt = 0.001
 // Medium
 sigma_e = 1/700 //S/mm
 
-// ----------------------- Creating Axon -------------------------------------
+// ----------------------- Creating Axon ------------------------------------ //
 create axon[N_NODES_axon]
 // initializing axon
 proc initialize(){
@@ -87,7 +87,7 @@ proc initialize(){
 	diam = 0.7*D_soma  // node diameter (um)
 	L    = 50		  // node length (um)
 	Ra   = rhoa*( (L + INL_soma) / L )  // trick to account for internodal resistance
-    cm   = 2					   // specific membrane capacitance (uF/cm^2)
+    cm   = 2					       // specific membrane capacitance (uF/cm^2)
     insert fh
         nai=10  nao=142  ki=141 ko=4.2   // [mM]
         areafac = PI*L*diam/100		     /* mamps/cm^2 to namps (units of 1e-6 cm^2) */
@@ -131,10 +131,12 @@ initialize()
 connect dend[N_NODES_den-1](1), soma[0](0)
 connect soma[0](1), axon[0](0)
 
+// HOW DO WE RENAME THIS TO WORK AS A SINGLE UNIT
+
 // ----------------------- Extracellular Stimulation ------------------------- //
 tot_NODES = N_NODES_den + N_NODES_soma + N_NODES_axon   // total nodes in neuron
 
-//for keeping track of node positions and Ve at nodes
+//for keeping track of node positions and Ve at nodes. THIS SHOULD THROW AN ERROR
 objref x_neuron, phi_e
 x_neuron = new Vector(tot_NODES,0)
 phi_e = new Vector(tot_NODES,0)
@@ -142,3 +144,10 @@ for i=0, tot_NODES-1{
 		x_neuron.x[i] = -(tot_NODES-1)/2*INL + INL*i   //centered at middle node. Only for odd N_NODES
 }
 x_neuron.mul(1e-3) //convert from um to mm
+
+// for recording membrane potentials
+objref vol_mem[tot_NODES]
+for i=0, tot_NODES-1{
+	vol_mem[i] = new Vector(tstop/dt,0)
+  vol_mem[i].record(&node[i].v(0.5))                // THIS SHOULD THROW AN ERROR
+}
