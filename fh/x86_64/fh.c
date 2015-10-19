@@ -10,7 +10,7 @@
 #include "section.h"
 #include "nrniv_mf.h"
 #include "md2redef.h"
- 
+
 #if METHOD3
 extern int _method3;
 #endif
@@ -20,10 +20,10 @@ extern int _method3;
 #define exp hoc_Exp
 extern double hoc_Exp(double);
 #endif
- 
+
 #define _threadargscomma_ /**/
 #define _threadargs_ /**/
- 
+
 #define _threadargsprotocomma_ /**/
 #define _threadargsproto_ /**/
  	/*SUPPRESS 761*/
@@ -32,7 +32,7 @@ extern double hoc_Exp(double);
 	/*SUPPRESS 765*/
 	 extern double *getarg();
  static double *_p; static Datum *_ppvar;
- 
+
 #define t nrn_threads->_t
 #define dt nrn_threads->_dt
 #define pnabar _p[0]
@@ -65,7 +65,7 @@ extern double hoc_Exp(double);
 #define _ion_ko	*_ppvar[5]._pval
 #define _ion_ik	*_ppvar[6]._pval
 #define _ion_dikdv	*_ppvar[7]._pval
- 
+
 #if MAC
 #if !defined(v)
 #define v _mlhv
@@ -74,7 +74,7 @@ extern double hoc_Exp(double);
 #define h _mlhh
 #endif
 #endif
- 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -171,12 +171,12 @@ static void  nrn_init(_NrnThread*, _Memb_list*, int);
 static void nrn_state(_NrnThread*, _Memb_list*, int);
  static void nrn_cur(_NrnThread*, _Memb_list*, int);
 static void  nrn_jacob(_NrnThread*, _Memb_list*, int);
- 
+
 static int _ode_count(int);
 static void _ode_map(int, double**, double**, double*, Datum*, double*, int);
 static void _ode_spec(_NrnThread*, _Memb_list*, int);
 static void _ode_matsol(_NrnThread*, _Memb_list*, int);
- 
+
 #define _cvode_ieq _ppvar[8]._i
  /* connect range variables in _p that hoc is supposed to know about */
  static const char *_mechanism[] = {
@@ -199,7 +199,7 @@ static void _ode_matsol(_NrnThread*, _Memb_list*, int);
  0};
  static Symbol* _na_sym;
  static Symbol* _k_sym;
- 
+
 extern Prop* need_memb(Symbol*);
 
 static void nrn_alloc(Prop* _prop) {
@@ -229,7 +229,7 @@ static void nrn_alloc(Prop* _prop) {
  	_ppvar[5]._pval = &prop_ion->param[2]; /* ko */
  	_ppvar[6]._pval = &prop_ion->param[3]; /* ik */
  	_ppvar[7]._pval = &prop_ion->param[4]; /* _ion_dikdv */
- 
+
 }
  static void _initlists();
   /* some states have an absolute tolerance */
@@ -259,7 +259,7 @@ extern void _cvode_abstol( Symbol**, double*, int);
  	hoc_register_cvode(_mechtype, _ode_count, _ode_map, _ode_spec, _ode_matsol);
  	hoc_register_tolerance(_mechtype, _hoc_state_tol, &_atollist);
  	hoc_register_var(hoc_scdoub, hoc_vdoub, hoc_intfunc);
- 	ivoc_help("help ?1 fh /Users/michellemueller/Documents/BME 504/Final Project/CochlearNerveFHModel/fh/x86_64/fh.mod\n");
+ 	ivoc_help("help ?1 fh /Users/matthewmccann/Documents/Code/CochlearNerveFHModel/fh/x86_64/fh.mod\n");
  hoc_register_limits(_mechtype, _hoc_parm_limits);
  hoc_register_units(_mechtype, _hoc_parm_units);
  }
@@ -276,13 +276,13 @@ static int _match_recurse=1;
 static void _modl_cleanup(){ _match_recurse=1;}
 static int _f_mhnp(double);
 static int mhnp(double);
- 
+
 static int _ode_spec1(_threadargsproto_);
 /*static int _ode_matsol1(_threadargsproto_);*/
  static void _n_mhnp(double);
  static int _slist1[4], _dlist1[4];
  static int states(_threadargsproto_);
- 
+
 double ghk (  double _lv , double _lci , double _lco ) {
    double _lghk;
  double _lz , _leci , _leco ;
@@ -290,16 +290,16 @@ double ghk (  double _lv , double _lci , double _lco ) {
    _leco = _lco * efun ( _threadargscomma_ _lz ) ;
    _leci = _lci * efun ( _threadargscomma_ - _lz ) ;
    _lghk = ( .001 ) * FARADAY * ( _leci - _leco ) ;
-   
+
 return _lghk;
  }
- 
+
 static void _hoc_ghk(void) {
   double _r;
    _r =  ghk (  *getarg(1) , *getarg(2) , *getarg(3) );
  hoc_retpushx(_r);
 }
- 
+
 double efun (  double _lz ) {
    double _lefun;
  if ( fabs ( _lz ) < 1e-4 ) {
@@ -308,16 +308,16 @@ double efun (  double _lz ) {
    else {
      _lefun = _lz / ( exp ( _lz ) - 1.0 ) ;
      }
-   
+
 return _lefun;
  }
- 
+
 static void _hoc_efun(void) {
   double _r;
    _r =  efun (  *getarg(1) );
  hoc_retpushx(_r);
 }
- 
+
 /*CVODE*/
  static int _ode_spec1 () {_reset=0;
  {
@@ -348,7 +348,7 @@ static void _hoc_efun(void) {
    }
   return 0;
 }
- 
+
 double alp (  double _lv , double _li ) {
    double _lalp;
  double _la , _lb , _lc , _lq10 ;
@@ -378,16 +378,16 @@ double alp (  double _lv , double _li ) {
      _lc = 10. ;
      _lalp = _lq10 * _la * expM1 ( _threadargscomma_ _lb - _lv , _lc ) ;
      }
-   
+
 return _lalp;
  }
- 
+
 static void _hoc_alp(void) {
   double _r;
    _r =  alp (  *getarg(1) , *getarg(2) );
  hoc_retpushx(_r);
 }
- 
+
 double bet (  double _lv , double _li ) {
    double _lbet;
  double _la , _lb , _lc , _lq10 ;
@@ -417,16 +417,16 @@ double bet (  double _lv , double _li ) {
      _lc = 20. ;
      _lbet = _lq10 * _la * expM1 ( _threadargscomma_ _lv - _lb , _lc ) ;
      }
-   
+
 return _lbet;
  }
- 
+
 static void _hoc_bet(void) {
   double _r;
    _r =  bet (  *getarg(1) , *getarg(2) );
  hoc_retpushx(_r);
 }
- 
+
 double expM1 (  double _lx , double _ly ) {
    double _lexpM1;
  if ( fabs ( _lx / _ly ) < 1e-6 ) {
@@ -435,10 +435,10 @@ double expM1 (  double _lx , double _ly ) {
    else {
      _lexpM1 = _lx / ( exp ( _lx / _ly ) - 1.0 ) ;
      }
-   
+
 return _lexpM1;
  }
- 
+
 static void _hoc_expM1(void) {
   double _r;
    _r =  expM1 (  *getarg(1) , *getarg(2) );
@@ -473,7 +473,7 @@ static void _hoc_expM1(void) {
  static void _n_mhnp(double _lv){ int _i, _j;
  double _xi, _theta;
  if (!usetable) {
- _f_mhnp(_lv); return; 
+ _f_mhnp(_lv); return;
 }
  _xi = _mfac_mhnp * (_lv - _tmin_mhnp);
  if (isnan(_xi)) {
@@ -495,7 +495,7 @@ static void _hoc_expM1(void) {
  for (_j = 0; _j < 4; _j++) {double *_t = _t_tau[_j]; tau[_j] = _t[_i] + _theta*(_t[_i+1] - _t[_i]);}
  }
 
- 
+
 static int  _f_mhnp (  double _lv ) {
    double _la , _lb ;
  {int  _li ;for ( _li = 0 ; _li <= 3 ; _li ++ ) {
@@ -505,16 +505,16 @@ static int  _f_mhnp (  double _lv ) {
      inf [ _li ] = _la / ( _la + _lb ) ;
      } }
     return 0; }
- 
+
 static void _hoc_mhnp(void) {
   double _r;
     _r = 1.;
  mhnp (  *getarg(1) );
  hoc_retpushx(_r);
 }
- 
+
 static int _ode_count(int _type){ return 4;}
- 
+
 static void _ode_spec(_NrnThread* _nt, _Memb_list* _ml, int _type) {
    Datum* _thread;
    Node* _nd; double _v; int _iml, _cntml;
@@ -530,8 +530,8 @@ static void _ode_spec(_NrnThread* _nt, _Memb_list* _ml, int _type) {
   ko = _ion_ko;
      _ode_spec1 ();
    }}
- 
-static void _ode_map(int _ieq, double** _pv, double** _pvdot, double* _pp, Datum* _ppd, double* _atol, int _type) { 
+
+static void _ode_map(int _ieq, double** _pv, double** _pvdot, double* _pp, Datum* _ppd, double* _atol, int _type) {
  	int _i; _p = _pp; _ppvar = _ppd;
 	_cvode_ieq = _ieq;
 	for (_i=0; _i < 4; ++_i) {
@@ -539,7 +539,7 @@ static void _ode_map(int _ieq, double** _pv, double** _pvdot, double* _pp, Datum
 		_cvode_abstol(_atollist, _atol, _i);
 	}
  }
- 
+
 static void _ode_matsol(_NrnThread* _nt, _Memb_list* _ml, int _type) {
    Datum* _thread;
    Node* _nd; double _v; int _iml, _cntml;
@@ -670,7 +670,7 @@ for (_iml = 0; _iml < _cntml; ++_iml) {
   {
 	NODERHS(_nd) -= _rhs;
   }
- 
+
 }}
 
 static void nrn_jacob(_NrnThread* _nt, _Memb_list* _ml, int _type){
@@ -690,7 +690,7 @@ for (_iml = 0; _iml < _cntml; ++_iml) {
      _nd = _ml->_nodelist[_iml];
 	NODED(_nd) += _g;
   }
- 
+
 }}
 
 static void nrn_state(_NrnThread* _nt, _Memb_list* _ml, int _type){
@@ -723,7 +723,7 @@ for (_iml = 0; _iml < _cntml; ++_iml) {
  for (; t < _break; t += dt) {
  error =  states();
  if(error){fprintf(stderr,"at line 58 in file fh.mod:\n	SOLVE states METHOD cnexp\n"); nrn_complain(_p); abort_run(error);}
- 
+
 }}
  t = _save;
  }  }}

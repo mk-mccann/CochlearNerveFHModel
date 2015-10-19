@@ -127,12 +127,12 @@ proc initialize(){
 }
 initialize()
 
-// ----------------------- Connect all parts ---------------------------------
+// ----------------------- Connect all parts --------------------------------- //
 connect dend[N_NODES_den-1](1), soma[0](0)
 connect soma[0](1), axon[0](0)
 
-// ----------------------- Extracellular Stimulation -------------------------
-tot_NODES = N_NODES_den + N_NODES_soma + N_NODES_axon       // total nodes in neuron
+// ----------------------- Extracellular Stimulation ------------------------- //
+tot_NODES = N_NODES_den + N_NODES_soma + N_NODES_axon   // total nodes in neuron
 
 //for keeping track of node positions and Ve at nodes
 objref x_neuron, phi_e
@@ -141,4 +141,4 @@ phi_e = new Vector(tot_NODES,0)
 for i=0, tot_NODES-1{
 		x_neuron.x[i] = -(tot_NODES-1)/2*INL + INL*i   //centered at middle node. Only for odd N_NODES
 }
-x_axon.mul(1e-3) //convert from um to mm
+x_neuron.mul(1e-3) //convert from um to mm

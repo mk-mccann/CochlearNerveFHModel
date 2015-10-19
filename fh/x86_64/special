@@ -10,4 +10,4 @@ if test "" = "yes" ; then
 else
 	NRNIV="${NRNBIN}nrniv"
 fi
-"${NRNIV}" -dll "/Users/michellemueller/Documents/BME 504/Final Project/CochlearNerveFHModel/fh/x86_64/.libs/libnrnmech.so" "$@"
+"${NRNIV}" -dll "/Users/matthewmccann/Documents/Code/CochlearNerveFHModel/fh/x86_64/.libs/libnrnmech.so" "$@"
