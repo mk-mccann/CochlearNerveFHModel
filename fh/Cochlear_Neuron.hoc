@@ -33,7 +33,7 @@ INL_dend = 175        // internodal length in um
 // Soma ----------------------------------------------------------------------
 D_soma = 10           // fiber diameter in um
 N_NODES_soma = 1      // number of nodes
-INL = 20              // internodal length in um
+INL_soma = 20              // internodal length in um
 
 // Axon ----------------------------------------------------------------------
 D_axon = 2            // fiber diameter in um
@@ -75,7 +75,7 @@ proc initialize(){
   for i=0, N_NODES_axon-2 {
 		connect axon[i](1), axon[i+1](0)
   }
-	finitialize(Vo)
+	finitialize(v_init)
 }
 initialize()
 
@@ -95,7 +95,7 @@ proc initialize(){
     insert pas
       g_pas = 1/2000
     insert extracellular   // for extracellular stimulation
-	finitialize(Vo)
+	finitialize(v_init)
 }
 initialize()
 
@@ -106,10 +106,10 @@ proc initialize(){
   for i=0, N_NODES_den-1 {
 		dend[i]{
 			nseg = 1
-			diam = 0.7*D  // node diameter (um)
+			diam = 0.7*D_den     // node diameter (um)
 			L    = 1		 // node length (um)
 			Ra   = rhoa*( (L + INL_dend) / L )  // trick to account for internodal resistance
-			cm   = 2					   // specific membrane capacitance (uF/cm^2)
+			cm   = 2					        // specific membrane capacitance (uF/cm^2)
       insert fh
             nai=10  nao=142  ki=141 ko=4.2   // [mM]
             areafac = PI*L*diam/100		/* mamps/cm^2 to namps (units of 1e-6 cm^2) */
@@ -123,9 +123,8 @@ proc initialize(){
   for i=0, N_NODES_den-2 {
 		connect dend[i](1), dend[i+1](0)
   }
-	finitialize(Vo)
+	finitialize(v_init)
 }
 initialize()
 
 // ----------------------- Connect all parts ---------------------------------
-coneect
