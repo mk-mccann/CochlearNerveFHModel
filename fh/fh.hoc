@@ -1,26 +1,4 @@
 /* Frankenhaeuser-Huxley action potential, Fig 1 to Fig 6 */
-
-/* Frankenhaeuser-Huxley model of the cochlear nerve.
-Authors: Lauren Heckelman, Matthew McCann, and Michelle Meuller.
-
-This code is modified from the work by Michael Hines, which describes the FH equation given in the original Frankenhaeuser-Huxley paper. Spiral ganglion cell membrane parameters taken from Frijns, de Snoo, and Shoonhoven (1995), and Cartee (2006).
-
-
-References:
-
-[1] Frankenhaeuser, B. and Huxley, A. F. (1964)
-The action potential in the myelinated nerve fibre of  Xenoupus Laevis
-as computed on the basis of voltage clamp data.
-J. Physiol. 171: 302-315
-
-[2] Hines, Michael. Xenopus Myelinated Neuron (Frankenhaeuser, Huxley 1964). From http://senselab.med.yale.edu/ModelDB/showModel.cshtml?model=3507
-
-[3] Frijns, J.H.M, de Snoo, S.L., and Schoonhoven, R. (1995) Potential distributions and neural excitation patterns in a rotationally symmetric model of the electrically stimulated cochlea. Hearing Research 87: 170-186
-
-[4] Cartee, Lianne, A. (2006). Spiral ganglion cell site of excitation II: Numerical model analysis. ￼￼Hearing Research 215: 22–30
-
-*/
-
 load_file("nrngui.hoc")
 
 // Physical properties
@@ -28,10 +6,10 @@ create node
 access node
 { nseg=1  L=2  diam=8  cm=2
   insert fh
-  nai=10  nao=142  ki=141 ko=4.2       // [mM]
+  nai=13.74  nao=114.5  ki=120 ko=2.5
 }
 areafac = PI*L*diam/100		/* mamps/cm^2 to namps (units of 1e-6 cm^2) */
-{celsius=37}                // Typical human body temperature
+{celsius=20}
 
 // experimental tools
 objref stim
@@ -90,3 +68,4 @@ proc menu() {
 }
 // run simulation
 menu()
+
