@@ -25,9 +25,6 @@ load_file("nrngui.hoc")
 rhoa = 110           // axial resistivity (ohm-cm)
 v_init = -65         //initial potential
 
-// Medium
-sigma_e = 1/700 //S/mm
-
 // Dendrite ------------------------------------------------------------------
 D_den = 1             // fiber diameter in um
 N_NODES_den = 5       // number of nodes
@@ -44,13 +41,15 @@ N_NODES_axon = 21     // number of nodes
 INL_axon = 100*D_axon      // internodal length in um
 
 // Stimulus ------------------------------------------------------------------
-PW = 0.1                    // pulse width in ms
-DELAY = 1                   //in ms
-E2F_DIST = 1                //electrode to fiber distance in mm
-AMPLITUDE = -4e-1           //cathodic, check units!
-areafac = PI*L*diam/100		// mamps/cm^2 to namps (units of 1e-6 cm^2)
+PW = 0.1              // pulse width in ms
+DELAY = 1             //in ms
+E2F_DIST = 1          //electrode to fiber distance in mm
+AMPLITUDE = -4e-1     //cathodic, check units!
 tstop = 10
 dt = 0.001
+
+// Medium
+sigma_e = 1/700 //S/mm
 
 // ----------------------- Creating Axon -------------------------------------
 create axon[N_NODES_axon]
@@ -91,7 +90,7 @@ proc initialize(){
     cm   = 2					   // specific membrane capacitance (uF/cm^2)
     insert fh
         nai=10  nao=142  ki=141 ko=4.2   // [mM]
-
+        areafac = PI*L*diam/100		     /* mamps/cm^2 to namps (units of 1e-6 cm^2) */
         {celsius=37}                     // Typical human body temperature
     insert pas
       g_pas = 1/2000
@@ -108,7 +107,7 @@ proc initialize(){
 		dend[i]{
 			nseg = 1
 			diam = 0.7*D_den     // node diameter (um)
-			L    = 1		     // node length (um)
+			L    = 1		 // node length (um)
 			Ra   = rhoa*( (L + INL_dend) / L )  // trick to account for internodal resistance
 			cm   = 2					        // specific membrane capacitance (uF/cm^2)
       insert fh
