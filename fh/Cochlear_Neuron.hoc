@@ -112,8 +112,8 @@ proc initialize(){
 			cm   = 2					        // specific membrane capacitance (uF/cm^2)
       insert fh
             nai=10  nao=142  ki=141 ko=4.2   // [mM]
-            areafac = PI*L*diam/100		/* mamps/cm^2 to namps (units of 1e-6 cm^2) */
-            {celsius=37}                // Typical human body temperature
+            areafac = PI*L*diam/100		     /* mamps/cm^2 to namps (units of 1e-6 cm^2) */
+            {celsius=37}                     // Typical human body temperature
       insert pas
             g_pas = 1/2000
 	  insert extracellular   // for extracellular stimulation
@@ -130,3 +130,6 @@ initialize()
 // ----------------------- Connect all parts ---------------------------------
 connect dend[N_NODES_den-1](1), soma[0](0)
 connect soma[0](1), axon[0](0)
+
+// ----------------------- Extracellular Stimulation -------------------------
+tot_NODES = N_NODES_den + N_NODES_soma + N_NODES_axon       // total nodes in neuron
