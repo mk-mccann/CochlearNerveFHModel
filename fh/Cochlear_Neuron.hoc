@@ -1,5 +1,5 @@
 /* Frankenhaeuser-Huxley model of the cochlear nerve.
-Authors: Lauren Heckelman, Matthew McCann, and Michelle Meuller.
+Authors: Lauren Heckelman, Matthew McCann, and Michelle Mueller.
 
 This code is modified from the work by Michael Hines, which describes the FH equation given in the original Frankenhaeuser-Huxley paper. Spiral ganglion cell membrane parameters taken from Frijns, et al. (1995), and Cartee (2006).
 
