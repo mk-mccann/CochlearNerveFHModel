@@ -128,3 +128,5 @@ proc initialize(){
 initialize()
 
 // ----------------------- Connect all parts ---------------------------------
+connect dend[N_NODES_den-1](1), soma[0](0)
+connect soma[0](1), axon[0](0)
