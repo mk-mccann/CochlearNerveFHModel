@@ -24,6 +24,9 @@ load_file("nrngui.hoc")
 
 rhoa = 110           // axial resistivity (ohm-cm)
 v_init = -65         //initial potential
+PNa = 172            //[um^3 / s]
+Pk = 6.68            //[um^3 / s]
+Gl = 2.43            //[nS]
 
 // Dendrite ------------------------------------------------------------------
 D_den = 1             // fiber diameter in um
@@ -33,7 +36,7 @@ INL_dend = 175        // internodal length in um
 // Soma ----------------------------------------------------------------------
 D_soma = 10           // fiber diameter in um
 N_NODES_soma = 1      // number of nodes
-INL_soma = 20              // internodal length in um
+INL_soma = 50              // internodal length in um
 
 // Axon ----------------------------------------------------------------------
 D_axon = 2            // fiber diameter in um
@@ -65,9 +68,13 @@ proc initialize(){
       insert fh
           nai=10  nao=142  ki=141 ko=4.2   // [mM]
           areafac = PI*L*diam/100		/* mamps/cm^2 to namps (units of 1e-6 cm^2) */
-          {celsius=37}                // Typical human body temperature
+          xarea = 3.14 * diam * diam/4    // [um^2]
+          sarea = 3.14 * diam * L         // [um^2]
+          pnabar =  PNa / sarea / 1e-4    // [cm/s]
+          pkbar = PNa / sarea / 1e-4      // [cm/s]
+          {celsius=37}                    // Typical human body temperature
       insert pas
-          g_pas = 1/2000
+          g_pas = Gl * 1e9 / sarea         // [S/cm^2]
 	  insert extracellular   // for extracellular stimulation
 		}
 	}
@@ -85,15 +92,19 @@ create soma[N_NODES_soma]
 proc initialize(){
 	nseg = 1
 	diam = 0.7*D_soma  // node diameter (um)
-	L    = 50		  // node length (um)
+	L    = 1		  // node length (um)
 	Ra   = rhoa*( (L + INL_soma) / L )  // trick to account for internodal resistance
     cm   = 2					       // specific membrane capacitance (uF/cm^2)
     insert fh
         nai=10  nao=142  ki=141 ko=4.2   // [mM]
         areafac = PI*L*diam/100		     /* mamps/cm^2 to namps (units of 1e-6 cm^2) */
+        xarea = 3.14 * diam * diam/4    // [um^2]
+        sarea = 3.14 * diam * L         // [um^2]
+        pnabar =  PNa / sarea / 1e-4    // [cm/s]
+        pkbar = PNa / sarea / 1e-4      // [cm/s]
         {celsius=37}                     // Typical human body temperature
     insert pas
-      g_pas = 1/2000
+        g_pas = Gl * 1e9 / sarea         // [S/cm^2]
     insert extracellular   // for extracellular stimulation
 	finitialize(v_init)
 }
@@ -113,9 +124,13 @@ proc initialize(){
       insert fh
             nai=10  nao=142  ki=141 ko=4.2   // [mM]
             areafac = PI*L*diam/100		     /* mamps/cm^2 to namps (units of 1e-6 cm^2) */
+            xarea = 3.14 * diam * diam/4     // [um^2]
+            sarea = 3.14 * diam * L          // [um^2]
+            pnabar =  PNa / sarea / 1e-4     // [cm/s]
+            pkbar = PNa / sarea / 1e-4       // [cm/s]
             {celsius=37}                     // Typical human body temperature
       insert pas
-            g_pas = 1/2000
+            g_pas = Gl * 1e9 / sarea         // [S/cm^2]      
 	  insert extracellular   // for extracellular stimulation
 		}
 	}
