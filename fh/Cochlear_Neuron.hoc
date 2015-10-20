@@ -73,7 +73,7 @@ proc initialize(){
           xarea = 3.14 * diam * diam/4    // [um^2]
           sarea = 3.14 * diam * L         // [um^2]
           pnabar =  PNa / sarea / 1e-4    // [cm/s]
-          pkbar = PNa / sarea / 1e-4      // [cm/s]
+          pkbar = Pk / sarea / 1e-4      // [cm/s]
           {celsius=37}                    // Typical human body temperature
           g_l = Gl * 1e9 / sarea         // [S/cm^2]
 	  insert extracellular   // for extracellular stimulation
@@ -102,7 +102,7 @@ proc initialize(){
         xarea = 3.14 * diam * diam/4    // cross sectional area [um^2]
         sarea = 3.14 * diam * L         // surface area of node [um^2]
         pnabar =  PNa / sarea / 1e-4    // [cm/s]
-        pkbar = PNa / sarea / 1e-4      // [cm/s]
+        pkbar = Pk / sarea / 1e-4      // [cm/s]
         {celsius=37}                    // Typical human body temperature
         g_l = Gl * 1e9 / sarea          // [S/cm^2]
     insert extracellular   // for extracellular stimulation
@@ -127,7 +127,7 @@ proc initialize(){
             xarea = 3.14 * diam * diam/4     // [um^2]
             sarea = 3.14 * diam * L          // [um^2]
             pnabar =  PNa / sarea / 1e-4     // [cm/s]
-            pkbar = PNa / sarea / 1e-4       // [cm/s]
+            pkbar = Pk / sarea / 1e-4       // [cm/s]
             {celsius=37}                     // Typical human body temperature
             g_l = Gl * 1e9 / sarea           // [S/cm^2]
 	  insert extracellular   // for extracellular stimulation
