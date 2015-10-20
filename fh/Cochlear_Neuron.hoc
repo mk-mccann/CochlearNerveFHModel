@@ -1,4 +1,5 @@
 /* Frankenhaeuser-Huxley model of the cochlear nerve.
+
 Authors: Lauren Heckelman, Matthew McCann, and Michelle Mueller.
 
 This code is modified from the work by Michael Hines, which describes the FH equation given in the original Frankenhaeuser-Huxley paper. Spiral ganglion cell membrane parameters taken from Frijns, et al. (1995), and Cartee (2006).
@@ -25,9 +26,9 @@ load_file("nrngui.hoc")
 
 rhoa = 110           // axial resistivity (ohm-cm)
 v_init = -65         //initial potential
-PNa = 172            //[um^3 / s]
-Pk = 6.68            //[um^3 / s]
-Gl = 2.43            //[nS]
+PNa = 172            // Sodium Permeability [um^3 / s]
+Pk = 6.68            // Potassium Permeability [um^3 / s]
+Gl = 2.43            // Leak Conductance [nS]
 
 // Dendrite ------------------------------------------------------------------
 D_den = 1             // fiber diameter in um
@@ -37,7 +38,7 @@ INL_dend = 175        // internodal length in um
 // Soma ----------------------------------------------------------------------
 D_soma = 10           // fiber diameter in um
 N_NODES_soma = 1      // number of nodes
-INL_soma = 50              // internodal length in um
+INL_soma = 50         // internodal length in um
 
 // Axon ----------------------------------------------------------------------
 D_axon = 2            // fiber diameter in um
@@ -63,19 +64,18 @@ proc initialize(){
 		axon[i]{
 			nseg = 1
 			diam = 0.7*D_axon  // node diameter (um)
-			L    = 1		 // node length (um)
+			L    = 1		   // node length (um)
 			Ra   = rhoa*( (L + INL_axon) / L )  // trick to account for internodal resistance
 			cm   = 2					   // specific membrane capacitance (uF/cm^2)
       insert fh
           nai=10  nao=142  ki=141 ko=4.2   // [mM]
-          areafac = PI*L*diam/100		/* mamps/cm^2 to namps (units of 1e-6 cm^2) */
+          areafac = PI*L*diam/100		  /* mamps/cm^2 to namps (units of 1e-6 cm^2) */
           xarea = 3.14 * diam * diam/4    // [um^2]
           sarea = 3.14 * diam * L         // [um^2]
           pnabar =  PNa / sarea / 1e-4    // [cm/s]
           pkbar = PNa / sarea / 1e-4      // [cm/s]
           {celsius=37}                    // Typical human body temperature
-      insert pas
-          g_pas = Gl * 1e9 / sarea         // [S/cm^2]
+          g_l = Gl * 1e9 / sarea         // [S/cm^2]
 	  insert extracellular   // for extracellular stimulation
 		}
 	}
@@ -97,15 +97,14 @@ proc initialize(){
 	Ra   = rhoa*( (L + INL_soma) / L )  // trick to account for internodal resistance
     cm   = 2					       // specific membrane capacitance (uF/cm^2)
     insert fh
-        nai=10  nao=142  ki=141 ko=4.2   // [mM]
-        areafac = PI*L*diam/100		     /* mamps/cm^2 to namps (units of 1e-6 cm^2) */
+        nai=10  nao=142  ki=141 ko=4.2  // [mM]
+        areafac = PI*L*diam/100		    // mamps/cm^2 to namps (units of 1e-6 cm^2)
         xarea = 3.14 * diam * diam/4    // cross sectional area [um^2]
         sarea = 3.14 * diam * L         // surface area of node [um^2]
         pnabar =  PNa / sarea / 1e-4    // [cm/s]
         pkbar = PNa / sarea / 1e-4      // [cm/s]
-        {celsius=37}                     // Typical human body temperature
-    insert pas
-        g_pas = Gl * 1e9 / sarea         // [S/cm^2]
+        {celsius=37}                    // Typical human body temperature
+        g_l = Gl * 1e9 / sarea          // [S/cm^2]
     insert extracellular   // for extracellular stimulation
 	finitialize(v_init)
 }
@@ -130,8 +129,7 @@ proc initialize(){
             pnabar =  PNa / sarea / 1e-4     // [cm/s]
             pkbar = PNa / sarea / 1e-4       // [cm/s]
             {celsius=37}                     // Typical human body temperature
-      insert pas
-            g_pas = Gl * 1e9 / sarea         // [S/cm^2]
+            g_l = Gl * 1e9 / sarea           // [S/cm^2]
 	  insert extracellular   // for extracellular stimulation
 		}
 	}
@@ -148,32 +146,87 @@ connect dend[N_NODES_den-1](1), soma[0](0)
 connect soma[0](1), axon[0](0)
 topology()
 
-// HOW DO WE RENAME THIS TO WORK AS A SINGLE UNIT
+// Visualize neuron
+objref s
+s = new Shape()
+
+// HOW DO WE RENAME THIS TO WORK AS A SINGLE UNIT???
 
 // ----------------------- Extracellular Stimulation ------------------------ //
 tot_NODES = N_NODES_den + N_NODES_soma + N_NODES_axon   // total nodes in neuron
 
-//for keeping track of node positions and Ve at nodes. THIS SHOULD THROW AN ERROR
-
+//for keeping track of node positions and Ve at nodes.
 objref x_neuron, phi_e
-x_neuron = new Vector(tot_NODES,0)
 phi_e = new Vector(tot_NODES,0)
 for i=0, tot_NODES-1{
     if(i <= N_NODES_axon - 1){
-		x_neuron.x[i] = -(tot_NODES-1)/2*INL_axon + INL_axon*i //centered at middle node. Only for odd N_NODES
+		x_neuron.x[i] = -(N_NODES_axon-1)/2*INL_axon + INL_axon*i //centered at middle node of axon. Only for odd N_NODES
     }
     if(i == N_NODES_axon + N_NODES_soma - 1){
-    	x_neuron.x[i] = -(tot_NODES-1)/2*INL_soma + INL_soma*i //centered at middle node. Only for odd N
+    	x_neuron.x[i] = -(N_NODES_soma-1)/2*INL_soma + INL_soma*i //centered at middle node of soma. Only for odd N
     }
     if(i >= N_NODES_axon + N_NODES_soma){
-    	x_neuron.x[i] = -(tot_NODES-1)/2*INL_dend + INL_dend*i //centered at middle node. Only for odd N
+    	x_neuron.x[i] = -(N_NODES_den-1)/2*INL_dend + INL_dend*i //centered at middle node of dendrite. Only for odd N
     }
 }
-x_neuron.mul(1e-3) //convert from um to mm
+// x_neuron.mul(1e-3) //convert from um to mm
 
 // for recording membrane potentials
-objref vol_mem[tot_NODES]
-for i=0, tot_NODES-1{
-	vol_mem[i] = new Vector(tstop/dt,0)
-  vol_mem[i].record(&node[i].v(0.5))                // THIS SHOULD THROW AN ERROR
+objref dend_mem[N_NODES_den], soma_mem[N_NODES_soma], axon_mem[N_NODES_axon]
+
+// Don't know if this syntax is correct for stimulating at only one point.
+
+for i=0, N_NODES_den-1{
+	dend_mem[i] = new Vector(tstop/dt,0)
+    dend_mem[i].record(dend[i].v(0.5))
+}
+
+for i=0, N_NODES_soma-1{
+    soma_mem[i] = new Vector(tstop/dt,0)
+    soma_mem[i].record(soma[i].v(0.5))
+}
+
+for i=0, N_NODES_axon-1{
+    axon_mem[i] = new Vector(tstop/dt,0)
+    axon_mem[i].record(axon[i].v(0.5))
+}
+
+//dummy stimulus only to control waveform parameters
+//The 'dummy' section has nothing to do with the fiber
+
+// Cathodic stimulation is negative!
+objref dummystim
+create dummy
+dummy dummystim = new IClamp(0.5)	// 0.5 is the normalized location
+dummystim.del = 0
+dummystim.dur = 0.1
+dummystim.amp = -1
+
+// extracellular potentials
+proc potential_field(){
+	for i=0, tot_NODES-1{
+		r = sqrt(x_neuron.x[i]^2+E2F_DIST^2) //in mm. Note that we are assuming that the electrode is at position (0,0,E2F_DIST) i.e. over the middle node
+		phi_e.x[i] = dummystim.i/(4*sigma_e*PI*r) // check units!!!!
+	}
+
+    for j = 0, N_NODES_axon-1{
+    	axon[j].e_extracellular(0.5) = phi_e.x[j]
+    }
+    for j = 0, N_NODES_soma-1{
+    	soma[j].e_extracellular(0.5) = phi_e.x[N_NODES_axon+j]
+    }
+    for j = 0, N_NODES_den-1{
+    	dend[j].e_extracellular(0.5) = phi_e.x[N_NODES_axon+N_NODES_soma+j]
+    }
+}
+
+}
+
+// time integrate with constant time step size
+proc stimulate(){
+	finitialize(v_init)
+	while (t<tstop) {
+		potential_field()
+	  fadvance()
+	}
 }
