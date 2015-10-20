@@ -99,8 +99,8 @@ proc initialize(){
     insert fh
         nai=10  nao=142  ki=141 ko=4.2   // [mM]
         areafac = PI*L*diam/100		     /* mamps/cm^2 to namps (units of 1e-6 cm^2) */
-        xarea = 3.14 * diam * diam/4    // [um^2]
-        sarea = 3.14 * diam * L         // [um^2]
+        xarea = 3.14 * diam * diam/4    // cross sectional area [um^2]
+        sarea = 3.14 * diam * L         // surface area of node [um^2]
         pnabar =  PNa / sarea / 1e-4    // [cm/s]
         pkbar = PNa / sarea / 1e-4      // [cm/s]
         {celsius=37}                     // Typical human body temperature
@@ -159,7 +159,15 @@ objref x_neuron, phi_e
 x_neuron = new Vector(tot_NODES,0)
 phi_e = new Vector(tot_NODES,0)
 for i=0, tot_NODES-1{
-		x_neuron.x[i] = -(tot_NODES-1)/2*INL + INL*i   //centered at middle node. Only for odd N_NODES
+    if(i <= N_NODES_axon - 1){
+		x_neuron.x[i] = -(tot_NODES-1)/2*INL_axon + INL_axon*i //centered at middle node. Only for odd N_NODES
+    }
+    if(i == N_NODES_axon + N_NODES_soma - 1){
+    	x_neuron.x[i] = -(tot_NODES-1)/2*INL_soma + INL_soma*i //centered at middle node. Only for odd N
+    }
+    if(i >= N_NODES_axon + N_NODES_soma){
+    	x_neuron.x[i] = -(tot_NODES-1)/2*INL_dend + INL_dend*i //centered at middle node. Only for odd N
+    }
 }
 x_neuron.mul(1e-3) //convert from um to mm
 
