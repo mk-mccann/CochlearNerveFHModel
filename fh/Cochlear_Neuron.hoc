@@ -3,6 +3,7 @@ Authors: Lauren Heckelman, Matthew McCann, and Michelle Mueller.
 
 This code is modified from the work by Michael Hines, which describes the FH equation given in the original Frankenhaeuser-Huxley paper. Spiral ganglion cell membrane parameters taken from Frijns, et al. (1995), and Cartee (2006).
 
+The origian code by Hines replicates Figures 1, 3 and 6 in the original Frankenhaeuser-Huxley paper. To validate for yourself, compile the fh.mod function and run fh.hoc.
 
 References:
 
@@ -130,7 +131,7 @@ proc initialize(){
             pkbar = PNa / sarea / 1e-4       // [cm/s]
             {celsius=37}                     // Typical human body temperature
       insert pas
-            g_pas = Gl * 1e9 / sarea         // [S/cm^2]      
+            g_pas = Gl * 1e9 / sarea         // [S/cm^2]
 	  insert extracellular   // for extracellular stimulation
 		}
 	}
@@ -142,16 +143,18 @@ proc initialize(){
 }
 initialize()
 
-// ----------------------- Connect all parts --------------------------------- //
+// ----------------------- Connect all parts -------------------------------- //
 connect dend[N_NODES_den-1](1), soma[0](0)
 connect soma[0](1), axon[0](0)
+topology()
 
 // HOW DO WE RENAME THIS TO WORK AS A SINGLE UNIT
 
-// ----------------------- Extracellular Stimulation ------------------------- //
+// ----------------------- Extracellular Stimulation ------------------------ //
 tot_NODES = N_NODES_den + N_NODES_soma + N_NODES_axon   // total nodes in neuron
 
 //for keeping track of node positions and Ve at nodes. THIS SHOULD THROW AN ERROR
+
 objref x_neuron, phi_e
 x_neuron = new Vector(tot_NODES,0)
 phi_e = new Vector(tot_NODES,0)
