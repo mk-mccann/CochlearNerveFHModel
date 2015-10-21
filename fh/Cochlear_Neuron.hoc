@@ -61,7 +61,7 @@ INL_axon = 100*D_axon // internodal length in um
 // Stimulus ------------------------------------------------------------------
 PW = 0.1              // pulse width in ms
 DELAY = 1             // in ms
-E2F_DIST = 0.5          // electrode to fiber distance in mm
+E2F_DIST = 0.5        // electrode to fiber distance in mm
 AMPLITUDE = -10     // cathodic, check units!
 tstop = 10            // in ms
 dt = 0.001
@@ -104,21 +104,23 @@ initialize()
 create soma[N_NODES_soma]
 // initializing soma
 proc initialize(){
-	nseg = 1
-	diam = 0.7*D_soma  // node diameter (um)
-	L    = 1		  // node length (um)
-	Ra   = rhoa*( (L + INL_soma) / L )  // trick to account for internodal resistance
-    cm   = 2					       // specific membrane capacitance (uF/cm^2)
-    insert fh
-        nai=10  nao=142  ki=141 ko=4.2  // [mM]
-        areafac = PI*L*diam/100		    // mamps/cm^2 to namps (units of 1e-6 cm^2)
-        xarea = 3.14 * diam * diam/4    // cross sectional area [um^2]
-        sarea = 3.14 * diam * L         // surface area of node [um^2]
-        pnabar =  PNa / sarea / 1e-4    // [cm/s]
-        pkbar = Pk / sarea / 1e-4      // [cm/s]
-        {celsius=37}                    // Typical human body temperature
-        g_l = Gl * 1e9 / sarea          // [S/cm^2]
-    insert extracellular   // for extracellular stimulation
+    soma{
+        nseg = 1
+        diam = 0.7*D_soma  // node diameter (um)
+        L    = 1		  // node length (um)
+        Ra   = rhoa*( (L + INL_soma) / L )  // trick to account for internodal resistance
+        cm   = 2					       // specific membrane capacitance (uF/cm^2)
+        insert fh
+            nai=10  nao=142  ki=141 ko=4.2  // [mM]
+            areafac = PI*L*diam/100		    // mamps/cm^2 to namps (units of 1e-6 cm^2)
+            xarea = 3.14 * diam * diam/4    // cross sectional area [um^2]
+            sarea = 3.14 * diam * L         // surface area of node [um^2]
+            pnabar =  PNa / sarea / 1e-4    // [cm/s]
+            pkbar = Pk / sarea / 1e-4      // [cm/s]
+            {celsius=37}                    // Typical human body temperature
+            g_l = Gl * 1e9 / sarea          // [S/cm^2]
+        insert extracellular   // for extracellular stimulation
+    }
 	finitialize(v_init)
 }
 initialize()
@@ -216,7 +218,7 @@ create dummy
 dummy dummystim = new IClamp(0.5)	// 0.5 is the normalized location
 dummystim.del = 0
 dummystim.dur = 0.1
-dummystim.amp = -1                  // Cathodic stimulation is negative!
+dummystim.amp = -10                  // Cathodic stimulation is negative!
 
 //------------------------------------------------------------------------------
 // This section creates a new vector that rereferences the length centered at the node of stimulation.
@@ -229,6 +231,15 @@ proc potential_field(){
 	for i=0, tot_NODES-1{
 		r = sqrt(stim_pos.x[i]^2+E2F_DIST^2) //in mm. Note that we are assuming that the electrode is at position (0,0,E2F_DIST) i.e. over the middle node
 		phi_e.x[i] = dummystim.i/(4*sigma_e*PI*r) // check units!!!!
+        if(i <= N_NODES_axon - 1){
+		    axon[i].e_extracellular(0.5) = phi_e.x[i]
+        }
+        if(i == N_NODES_axon + N_NODES_soma - 1){
+    	    soma[0].e_extracellular(0.5) = phi_e.x[i]
+        }
+        if(i >= N_NODES_axon + N_NODES_soma){
+    	    dend[i - (N_NODES_axon + N_NODES_soma)].e_extracellular(0.5) = phi_e.x[i]
+        }
     }
 }
 
