@@ -38,7 +38,7 @@ J. Physiol. 171: 302-315
 // ----------------------- Global Variables --------------------------------- //
 
 rhoa = 110           // axial resistivity [ohm-cm]
-v_init = -65         // initial potential [mV]
+v_init = -70         // initial potential [mV]
 PNa = 172            // Sodium Permeability [um^3 / s]
 Pk = 6.68            // Potassium Permeability [um^3 / s]
 Gl = 2.43            // Leak Conductance [nS]
@@ -59,10 +59,10 @@ N_NODES_axon = 21     // number of nodes
 INL_axon = 100*D_axon // internodal length in um
 
 // Stimulus ------------------------------------------------------------------
-PW = 0.1              // pulse width in ms
+PW = 0.05             // pulse width in ms
 DELAY = 1             // in ms
-E2F_DIST = 0.5        // electrode to fiber distance in mm
-AMPLITUDE = -10     // cathodic, check units!
+E2F_DIST = 1          // electrode to fiber distance in mm
+AMPLITUDE = -8.75     // cathodic [nA]
 tstop = 10            // in ms
 dt = 0.001
 
@@ -216,9 +216,9 @@ for i = 0, N_NODES_den-1{
 objref dummystim
 create dummy
 dummy dummystim = new IClamp(0.5)	// 0.5 is the normalized location
-dummystim.del = 0
-dummystim.dur = 0.1
-dummystim.amp = -10                  // Cathodic stimulation is negative!
+dummystim.del = DELAY
+dummystim.dur = PW
+dummystim.amp = AMPLITUDE               // Cathodic stimulation is negative!
 
 //------------------------------------------------------------------------------
 // This section creates a new vector that rereferences the length centered at the node of stimulation.
@@ -258,6 +258,6 @@ proc stimulate(){
 stimulate()
 objref g, rp
 g = new Graph()
-g.size(0,tstop,v_init-10,40)
-//dend_mem[2].plot(g,dt)
-axon_mem[10].plot(g,dt,2,1)
+g.size(0,tstop/2,v_init-10,40)
+dend_mem[2].plot(g,dt)
+soma_mem[0].plot(g,dt,2,1)
