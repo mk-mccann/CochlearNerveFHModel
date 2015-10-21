@@ -1,0 +1,68 @@
+// SGC_Geometry
+
+load_file("nrngui.hoc")
+
+NDEND = 5
+NAXON = 21
+create soma, dend[NDEND], axon[NAXON]
+access soma
+connect dend(0), soma(1)
+for i = 1, NDEND-1 {
+    connect dend[i](0), dend[i-1](1)
+}
+for i = 0, NAXON-2 {
+    connect axon[i](1), axon[i+1](0)
+}
+connect axon[NAXON-1](1), soma(0)
+
+// Geometry
+forall pt3dclear()
+soma {
+    D_soma = 10
+    pt3dadd(0,0,0,D_soma)
+    pt3dadd(D_soma,0,0,D_soma)
+}
+
+dend[0] {
+    D_den = 1
+    INL_dend = 175
+    pt3dadd(D_soma,0,0,D_den)
+    pt3dadd(D_soma+INL_dend,0,0,D_den)
+}
+
+dend[1] {
+    D_den = 1
+    INL_dend = 175
+    pt3dadd(D_soma+INL_dend,0,0,D_den)
+    pt3dadd(D_soma+INL_dend+(INL_dend*cos(PI/4)),-INL_dend*sin(PI/4),0,D_den)
+}
+
+dend[2] {
+    D_den = 1
+    INL_dend = 175
+    pt3dadd(D_soma+INL_dend+(INL_dend*cos(PI/4)),-INL_dend*sin(PI/4),0,D_den)
+    pt3dadd(D_soma+INL_dend+(INL_dend*cos(PI/4)),(-INL_dend*sin(PI/4))-INL_dend,0,D_den)
+}
+
+dend[3] {
+    D_den = 1
+    INL_dend = 175
+    pt3dadd(D_soma+INL_dend+(INL_dend*cos(PI/4)),(-INL_dend*sin(PI/4))-INL_dend,0,D_den)
+    pt3dadd(D_soma+INL_dend,(-2*INL_dend*sin(PI/4))-INL_dend,0,D_den)
+}
+
+dend[4] {
+    D_den = 1
+    INL_dend = 175
+    pt3dadd(D_soma+INL_dend,(-2*INL_dend*sin(PI/4))-INL_dend,0,D_den)
+    pt3dadd(D_soma,(-2*INL_dend*sin(PI/4))-INL_dend,0,D_den)
+}
+
+for i = 0, NAXON-1 {
+    axon[i] {
+        D_axon = 2
+        INL_axon = 100*D_axon
+        pt3dadd(-INL_axon*(NAXON-i),0,0,D_axon)
+        pt3dadd(-INL_axon*(NAXON-i+1),0,0,D_axon)
+    }
+}
