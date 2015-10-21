@@ -23,39 +23,38 @@ soma {
     pt3dadd(D_soma,0,0,D_soma)
 }
 
+for i = 0, NDEND-1 {
+    dend[i] {
+        D_den = 1
+        INL_dend = 175
+        angle_degree = 15
+        angle_rad = angle_degree*(PI/180)
+    }
+}
+
 dend[0] {
-    D_den = 1
-    INL_dend = 175
     pt3dadd(D_soma,0,0,D_den)
     pt3dadd(D_soma+INL_dend,0,0,D_den)
 }
 
 dend[1] {
-    D_den = 1
-    INL_dend = 175
     pt3dadd(D_soma+INL_dend,0,0,D_den)
-    pt3dadd(D_soma+INL_dend+(INL_dend*cos(PI/4)),-INL_dend*sin(PI/4),0,D_den)
+    pt3dadd(D_soma+INL_dend+(INL_dend*cos(angle_rad)),-INL_dend*sin(angle_rad),0,D_den)
 }
 
 dend[2] {
-    D_den = 1
-    INL_dend = 175
-    pt3dadd(D_soma+INL_dend+(INL_dend*cos(PI/4)),-INL_dend*sin(PI/4),0,D_den)
-    pt3dadd(D_soma+INL_dend+(INL_dend*cos(PI/4)),(-INL_dend*sin(PI/4))-INL_dend,0,D_den)
+    pt3dadd(D_soma+INL_dend+(INL_dend*cos(angle_rad)),-INL_dend*sin(angle_rad),0,D_den)
+    pt3dadd(D_soma+INL_dend+(INL_dend*cos(angle_rad))+(INL_dend*cos(2*angle_rad)),(-INL_dend*sin(angle_rad))-(INL_dend*sin(2*angle_rad)),0,D_den)
 }
 
 dend[3] {
-    D_den = 1
-    INL_dend = 175
-    pt3dadd(D_soma+INL_dend+(INL_dend*cos(PI/4)),(-INL_dend*sin(PI/4))-INL_dend,0,D_den)
-    pt3dadd(D_soma+INL_dend,(-2*INL_dend*sin(PI/4))-INL_dend,0,D_den)
+    pt3dadd(D_soma+INL_dend+(INL_dend*cos(angle_rad))+(INL_dend*cos(2*angle_rad)),(-INL_dend*sin(angle_rad))-(INL_dend*sin(2*angle_rad)),0,D_den)
+    pt3dadd(D_soma+INL_dend+(INL_dend*cos(angle_rad))+(INL_dend*cos(2*angle_rad))+(INL_dend*cos(3*angle_rad)),(-INL_dend*sin(angle_rad))-(INL_dend*sin(2*angle_rad))-(INL_dend*sin(3*angle_rad)),0,D_den)
 }
 
 dend[4] {
-    D_den = 1
-    INL_dend = 175
-    pt3dadd(D_soma+INL_dend,(-2*INL_dend*sin(PI/4))-INL_dend,0,D_den)
-    pt3dadd(D_soma,(-2*INL_dend*sin(PI/4))-INL_dend,0,D_den)
+    pt3dadd(D_soma+INL_dend+(INL_dend*cos(angle_rad))+(INL_dend*cos(2*angle_rad))+(INL_dend*cos(3*angle_rad)),(-INL_dend*sin(angle_rad))-(INL_dend*sin(2*angle_rad))-(INL_dend*sin(3*angle_rad)),0,D_den)
+    pt3dadd(D_soma+INL_dend+(INL_dend*cos(angle_rad))+(INL_dend*cos(2*angle_rad))+(INL_dend*cos(3*angle_rad))+(INL_dend*cos(4*angle_rad)),(-INL_dend*sin(angle_rad))-(INL_dend*sin(2*angle_rad))-(INL_dend*sin(3*angle_rad))-(INL_dend*sin(4*angle_rad)),0,D_den)
 }
 
 for i = 0, NAXON-1 {
