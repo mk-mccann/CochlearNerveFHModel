@@ -229,16 +229,18 @@ stim_pos = x_neuron.c.sub(pos)
 // extracellular potentials
 proc potential_field(){
 	for i=0, tot_NODES-1{
-		r = sqrt(stim_pos.x[i]^2+E2F_DIST^2) //in mm. Note that we are assuming that the electrode is at position (0,0,E2F_DIST) i.e. over the middle node
+		r = sqrt(stim_pos.x[i]^2+E2F_DIST^2) // [mm] Note that we are assuming that the electrode is at position (0,0,E2F_DIST) i.e. centered over the node specified by "pos" above
 		phi_e.x[i] = dummystim.i/(4*sigma_e*PI*r) // check units!!!!
+
+        // Note the weird indexing is due to the order that the segments are attached (see topology)
         if(i <= N_NODES_axon - 1){
-		    axon[i].e_extracellular(0.5) = phi_e.x[i]
+		    axon[(N_NODES_axon-1) - i].e_extracellular(0.5) = phi_e.x[i]
         }
         if(i == N_NODES_axon + N_NODES_soma - 1){
     	    soma[0].e_extracellular(0.5) = phi_e.x[i]
         }
         if(i >= N_NODES_axon + N_NODES_soma){
-    	    dend[i - (N_NODES_axon + N_NODES_soma)].e_extracellular(0.5) = phi_e.x[i]
+    	    dend[(tot_NODES-1) - i].e_extracellular(0.5) = phi_e.x[i]
         }
     }
 }
@@ -252,10 +254,10 @@ proc stimulate(){
 	}
 }
 
-// ----------------------- Debugging -----------------------------------------
+// ----------------------- Plotting -----------------------------------------
 stimulate()
 objref g, rp
 g = new Graph()
 g.size(0,tstop,v_init-10,40)
-dend_mem[2].plot(g,dt)
+//dend_mem[2].plot(g,dt)
 axon_mem[10].plot(g,dt,2,1)
