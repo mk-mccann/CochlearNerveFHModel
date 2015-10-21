@@ -2,15 +2,15 @@
 
 Authors: Lauren Heckelman, Matthew McCann, and Michelle Mueller.
 
-This code is modified from the work by Michael Hines, which describes the FH equation given in the original Frankenhaeuser-Huxley paper. Spiral ganglion cell membrane parameters taken from Frijns, et al. (1995), and Cartee (2006).
+This code relies on the FH mechanism written by Michael Hines, which describes the FH equation given in the original Frankenhaeuser-Huxley paper. Also referenced is the extracellular_sample.hoc code distributed by Leo Medina. Spiral ganglion cell membrane parameters taken from Frijns, et al. (1995), and Cartee (2006).
 
-The origian code by Hines replicates Figures 1, 3 and 6 in the original Frankenhaeuser-Huxley paper. To validate for yourself, compile the fh.mod function and run fh.hoc.
+The original code by Hines replicates Figures 1, 3, and 6 in the original Frankenhaeuser-Huxley paper. To validate for yourself, compile the fh.mod function and run fh.hoc.
 
 References:
 
 [1] Frankenhaeuser, B. and Huxley, A. F. (1964)
-The action potential in the myelinated nerve fibre of  Xenoupus Laevis
-as computed on the basis of voltage clamp data.
+The action potential in the myelinated nerve fibre of Xenoupus Laevis as computed
+on the basis of voltage clamp data.
 J. Physiol. 171: 302-315
 
 [2] Hines, Michael. Xenopus Myelinated Neuron (Frankenhaeuser, Huxley 1964). From http://senselab.med.yale.edu/ModelDB/showModel.cshtml?model=3507
@@ -18,14 +18,27 @@ J. Physiol. 171: 302-315
 [3] Frijns, J.H.M, de Snoo, S.L., and Schoonhoven, R. (1995) Potential distributions and neural excitation patterns in a rotationally symmetric model of the electrically stimulated cochlea. Hearing Research 87: 170-186
 
 [4] Cartee, Lianne, A. (2006). Spiral ganglion cell site of excitation II: Numerical model analysis. ￼￼Hearing Research 215: 22–30
+
 */
 
-load_file("nrngui.hoc")
+/* Note the following parameter units used by the fh.mod function:
+	v (mV)
+	celsius (degC)
+	pnabar (cm/s)
+	ppbar (cm/s)
+	pkbar (cm/s)
+	nai (mM)
+	nao (mM)
+	ki (mM)
+	ko (mM)
+	gl (S/cm2)
+	el (mV)
+*/
 
 // ----------------------- Global Variables --------------------------------- //
 
-rhoa = 110           // axial resistivity (ohm-cm)
-v_init = -65         //initial potential
+rhoa = 110           // axial resistivity [ohm-cm]
+v_init = -65         // initial potential [mV]
 PNa = 172            // Sodium Permeability [um^3 / s]
 Pk = 6.68            // Potassium Permeability [um^3 / s]
 Gl = 2.43            // Leak Conductance [nS]
@@ -43,18 +56,18 @@ INL_soma = 50         // internodal length in um
 // Axon ----------------------------------------------------------------------
 D_axon = 2            // fiber diameter in um
 N_NODES_axon = 21     // number of nodes
-INL_axon = 100*D_axon      // internodal length in um
+INL_axon = 100*D_axon // internodal length in um
 
 // Stimulus ------------------------------------------------------------------
 PW = 0.1              // pulse width in ms
-DELAY = 1             //in ms
-E2F_DIST = 1          //electrode to fiber distance in mm
-AMPLITUDE = -4e-1     //cathodic, check units!
-tstop = 10
+DELAY = 1             // in ms
+E2F_DIST = 0.5          // electrode to fiber distance in mm
+AMPLITUDE = -10     // cathodic, check units!
+tstop = 10            // in ms
 dt = 0.001
 
-// Medium
-sigma_e = 1/700 //S/mm
+// Extracellular Medium
+sigma_e = 1/700       // [S/mm]
 
 // ----------------------- Creating Axon ------------------------------------ //
 create axon[N_NODES_axon]
@@ -68,14 +81,14 @@ proc initialize(){
 			Ra   = rhoa*( (L + INL_axon) / L )  // trick to account for internodal resistance
 			cm   = 2					   // specific membrane capacitance (uF/cm^2)
       insert fh
-          nai=10  nao=142  ki=141 ko=4.2   // [mM]
-          areafac = PI*L*diam/100		  /* mamps/cm^2 to namps (units of 1e-6 cm^2) */
+          nai=10  nao=142  ki=141 ko=4.2  // [mM]
+          areafac = PI*L*diam/100		  // mamps/cm^2 to namps (units of 1e-6 cm^2)
           xarea = 3.14 * diam * diam/4    // [um^2]
           sarea = 3.14 * diam * L         // [um^2]
           pnabar =  PNa / sarea / 1e-4    // [cm/s]
           pkbar = Pk / sarea / 1e-4      // [cm/s]
           {celsius=37}                    // Typical human body temperature
-          g_l = Gl * 1e9 / sarea         // [S/cm^2]
+          g_l = Gl * 1e9 / sarea          // [S/cm^2]
 	  insert extracellular   // for extracellular stimulation
 		}
 	}
@@ -87,7 +100,7 @@ proc initialize(){
 }
 initialize()
 
-// ----------------------- Creating Soma -------------------------------------
+// ----------------------- Creating Soma ------------------------------------ //
 create soma[N_NODES_soma]
 // initializing soma
 proc initialize(){
@@ -110,7 +123,7 @@ proc initialize(){
 }
 initialize()
 
-// ----------------------- Creating Dendrite ---------------------------------
+// ----------------------- Creating Dendrite -------------------------------- //
 create dend[N_NODES_den]
 // initializing dendrite
 proc initialize(){
@@ -123,7 +136,7 @@ proc initialize(){
 			cm   = 2					        // specific membrane capacitance (uF/cm^2)
       insert fh
             nai=10  nao=142  ki=141 ko=4.2   // [mM]
-            areafac = PI*L*diam/100		     /* mamps/cm^2 to namps (units of 1e-6 cm^2) */
+            areafac = PI*L*diam/100		     // mamps/cm^2 to namps (units of 1e-6 cm^2)
             xarea = 3.14 * diam * diam/4     // [um^2]
             sarea = 3.14 * diam * L          // [um^2]
             pnabar =  PNa / sarea / 1e-4     // [cm/s]
@@ -141,85 +154,82 @@ proc initialize(){
 }
 initialize()
 
-// ----------------------- Connect all parts -------------------------------- //
+// ----------------------- Connect all parts and view ----------------------- //
 connect dend[N_NODES_den-1](1), soma[0](0)
 connect soma[0](1), axon[0](0)
+// HOW DO WE RENAME THIS TO HANDLE AS A SINGLE UNIT???
+
+/* See topology in command window [MAKE SURE TO STUDY THIS. AXON NODE 0-20, SOMA
+NODE 21, DENDRITE NODE 22-26 */
 topology()
 
-// Visualize neuron
-objref s
-s = new Shape()
-
-// HOW DO WE RENAME THIS TO WORK AS A SINGLE UNIT???
+// Visualize neuron (it looks dumb)
+//objref s
+//s = new Shape()
 
 // ----------------------- Extracellular Stimulation ------------------------ //
 tot_NODES = N_NODES_den + N_NODES_soma + N_NODES_axon   // total nodes in neuron
 
-//for keeping track of node positions and Ve at nodes.
-objref x_neuron, phi_e
-phi_e = new Vector(tot_NODES,0)
+// This section evaluates the length of the neuron referenced at the beginning of the axon (that is, axon[0](0) has length 0 mm.)
+objref x_neuron
+x_neuron = new Vector(tot_NODES,0)
 for i=0, tot_NODES-1{
     if(i <= N_NODES_axon - 1){
-		x_neuron.x[i] = -(N_NODES_axon-1)/2*INL_axon + INL_axon*i //centered at middle node of axon. Only for odd N_NODES
+		x_neuron.x[i] = INL_axon*i
     }
     if(i == N_NODES_axon + N_NODES_soma - 1){
-    	x_neuron.x[i] = -(N_NODES_soma-1)/2*INL_soma + INL_soma*i //centered at middle node of soma. Only for odd N
+    	x_neuron.x[i] = x_neuron.x[i-1] + INL_soma
     }
     if(i >= N_NODES_axon + N_NODES_soma){
-    	x_neuron.x[i] = -(N_NODES_den-1)/2*INL_dend + INL_dend*i //centered at middle node of dendrite. Only for odd N
+    	x_neuron.x[i] = x_neuron.x[i-1] + INL_dend
     }
 }
-// x_neuron.mul(1e-3) //convert from um to mm
+x_neuron.mul(1e-3) //convert from um to mm
 
-// for recording membrane potentials
-objref dend_mem[N_NODES_den], soma_mem[N_NODES_soma], axon_mem[N_NODES_axon]
+// Create vector to hold extracellular potential values
+objref phi_e
+phi_e = new Vector(tot_NODES,0)
 
-// Don't know if this syntax is correct for stimulating at only one point.
+// Vectors to hold recorded membrane potentials
+objref  soma_mem[N_NODES_soma], axon_mem[N_NODES_axon], dend_mem[N_NODES_den]    // objects to store voltage in soma and axon
 
-for i=0, N_NODES_den-1{
-	dend_mem[i] = new Vector(tstop/dt,0)
-    dend_mem[i].record(dend[i].v(0.5))
+for i = 0, N_NODES_soma-1{
+    soma_mem[i] = new Vector(tstop/dt,0)    // voltage in the soma
+    soma_mem[i].record(&soma[i].v(0.5))   // record soma voltage in middle of soma
 }
 
-for i=0, N_NODES_soma-1{
-    soma_mem[i] = new Vector(tstop/dt,0)
-    soma_mem[i].record(soma[i].v(0.5))
+for i = 0, N_NODES_axon-1{
+    axon_mem[i] = new Vector(tstop/dt,0)    // voltage in the axon
+    axon_mem[i].record(&axon[i].v(0.5))   // record soma voltage in middle of axon
 }
 
-for i=0, N_NODES_axon-1{
-    axon_mem[i] = new Vector(tstop/dt,0)
-    axon_mem[i].record(axon[i].v(0.5))
+for i = 0, N_NODES_den-1{
+    dend_mem[i] = new Vector(tstop/dt,0)    // voltage in the dendrite
+    dend_mem[i].record(&dend[i].v(0.5))   // record soma voltage in middle of dendrite
 }
+
 
 //dummy stimulus only to control waveform parameters
 //The 'dummy' section has nothing to do with the fiber
-
-// Cathodic stimulation is negative!
 objref dummystim
 create dummy
 dummy dummystim = new IClamp(0.5)	// 0.5 is the normalized location
 dummystim.del = 0
 dummystim.dur = 0.1
-dummystim.amp = -1
+dummystim.amp = -1                  // Cathodic stimulation is negative!
+
+//------------------------------------------------------------------------------
+// This section creates a new vector that rereferences the length centered at the node of stimulation.
+objref stim_pos
+pos = x_neuron.x[24]        // This is the node you want to center the electrode over. In this      situation, we are referencing node 24, or the middle of the dendrite.
+stim_pos = x_neuron.c.sub(pos)
 
 // extracellular potentials
 proc potential_field(){
 	for i=0, tot_NODES-1{
-		r = sqrt(x_neuron.x[i]^2+E2F_DIST^2) //in mm. Note that we are assuming that the electrode is at position (0,0,E2F_DIST) i.e. over the middle node
+		r = sqrt(stim_pos.x[i]^2+E2F_DIST^2) //in mm. Note that we are assuming that the electrode is at position (0,0,E2F_DIST) i.e. over the middle node
 		phi_e.x[i] = dummystim.i/(4*sigma_e*PI*r) // check units!!!!
-	}
-
-    for j = 0, N_NODES_axon-1{
-    	axon[j].e_extracellular(0.5) = phi_e.x[j]
     }
-    for j = 0, N_NODES_soma-1{
-    	soma[j].e_extracellular(0.5) = phi_e.x[N_NODES_axon+j]
-    }
-    for j = 0, N_NODES_den-1{
-    	dend[j].e_extracellular(0.5) = phi_e.x[N_NODES_axon+N_NODES_soma+j]
-    }
-}
-
 }
 
 // time integrate with constant time step size
@@ -230,3 +240,11 @@ proc stimulate(){
 	  fadvance()
 	}
 }
+
+// ----------------------- Debugging -----------------------------------------
+stimulate()
+objref g, rp
+g = new Graph()
+g.size(0,tstop,v_init-10,40)
+dend_mem[2].plot(g,dt)
+axon_mem[10].plot(g,dt,2,1)
