@@ -1,0 +1,294 @@
+/* Frankenhaeuser-Huxley model of the cochlear nerve.
+
+Authors: Lauren Heckelman, Matthew McCann, and Michelle Mueller.
+
+This code relies on the FH mechanism written by Michael Hines, which describes the FH equation given in the original Frankenhaeuser-Huxley paper. Also referenced is the extracellular_sample.hoc code distributed by Leo Medina. Spiral ganglion cell membrane parameters taken from Frijns, et al. (1995), and Cartee (2006).
+
+The original code by Hines replicates Figures 1, 3, and 6 in the original Frankenhaeuser-Huxley paper. To validate for yourself, compile the fh.mod function and run fh.hoc.
+
+References:
+
+[1] Frankenhaeuser, B. and Huxley, A. F. (1964)
+The action potential in the myelinated nerve fibre of Xenoupus Laevis as computed
+on the basis of voltage clamp data.
+J. Physiol. 171: 302-315
+
+[2] Hines, Michael. Xenopus Myelinated Neuron (Frankenhaeuser, Huxley 1964). From http://senselab.med.yale.edu/ModelDB/showModel.cshtml?model=3507
+
+[3] Frijns, J.H.M, de Snoo, S.L., and Schoonhoven, R. (1995) Potential distributions and neural excitation patterns in a rotationally symmetric model of the electrically stimulated cochlea. Hearing Research 87: 170-186
+
+[4] Cartee, Lianne, A. (2006). Spiral ganglion cell site of excitation II: Numerical model analysis. ￼￼Hearing Research 215: 22–30
+
+
+ Note the following parameter units used by the fh.mod function:
+	v (mV)
+	celsius (degC)
+	pnabar (cm/s)
+	ppbar (cm/s)
+	pkbar (cm/s)
+	nai (mM)
+	nao (mM)
+	ki (mM)
+	ko (mM)
+	gl (S/cm2)
+	el (mV)
+*/
+
+// ----------------------- Global Variables --------------------------------- //
+
+rhoa = 110           // axial resistivity [ohm-cm]
+v_init = -70         // initial potential [mV]
+PNa = 172            // Sodium Permeability [um^3 / s]
+Pk = 6.68            // Potassium Permeability [um^3 / s]
+Gl = 2.43            // Leak Conductance [nS]
+
+// Dendrite ------------------------------------------------------------------
+D_den = 1             // fiber diameter in um
+NDEND = 5             // number of nodes
+INL_dend = 175        // internodal length in um
+angle_degree = 15
+angle_rad = angle_degree*(PI/180)
+
+// Soma ----------------------------------------------------------------------
+D_soma = 10           // fiber diameter in um
+NSOMA = 1      // number of nodes
+INL_soma = 50         // internodal length in um
+
+// Axon ----------------------------------------------------------------------
+D_axon = 2            // fiber diameter in um
+NAXON = 21     // number of nodes
+INL_axon = 100*D_axon // internodal length in um
+
+// Stimulus ------------------------------------------------------------------
+PW = 0.05             // pulse width in ms
+DELAY = 1             // in ms
+E2F_DIST = 1          // electrode to fiber distance in mm
+AMPLITUDE = -8.75     // cathodic [nA]
+tstop = 10            // in ms
+dt = 0.001
+
+// Extracellular Medium
+sigma_e = 1/700       // [S/mm]
+
+// ----------------------- Creating Fiber ----------------------------------- //
+create axon[NAXON], soma[NSOMA], dend[NDEND]
+
+proc initialize(){
+
+    // ---------------------------------- AXON ------------------------------ //
+    for i=0, NAXON-1 {
+		axon[i]{
+			nseg = 1
+			diam = 0.7*D_axon  // node diameter (um)
+			L    = 1		   // node length (um)
+			Ra   = rhoa*( (L + INL_axon) / L )  // trick to account for internodal resistance
+			cm   = 2					   // specific membrane capacitance (uF/cm^2)
+        insert extracellular   // for extracellular stimulation
+        insert fh
+          nai=10  nao=142  ki=141 ko=4.2  // [mM]
+          areafac = PI*L*diam/100		  // mamps/cm^2 to namps (units of 1e-6 cm^2)
+          xarea = 3.14 * diam * diam/4    // [um^2]
+          sarea = 3.14 * diam * L         // [um^2]
+          pnabar =  PNa / sarea / 1e-4    // [cm/s]
+          pkbar = Pk / sarea / 1e-4       // [cm/s]
+          {celsius=37}                    // Typical human body temperature
+          g_l = Gl * 1e9 / sarea          // [S/cm^2]
+		}
+	}
+
+    // ---------------------------------- SOMA ------------------------------ //
+    soma{
+        nseg = 1
+        diam = 0.7*D_soma  // node diameter (um)
+        L    = 1		  // node length (um)
+        Ra   = rhoa*( (L + INL_soma) / L )  // trick to account for internodal resistance
+        cm   = 2					        // specific membrane capacitance (uF/cm^2)
+        insert extracellular   // for extracellular stimulation
+        insert fh
+            nai=10  nao=142  ki=141 ko=4.2  // [mM]
+            areafac = PI*L*diam/100		    // mamps/cm^2 to namps (units of 1e-6 cm^2)
+            xarea = 3.14 * diam * diam/4    // cross sectional area [um^2]
+            sarea = 3.14 * diam * L         // surface area of node [um^2]
+            pnabar =  PNa / sarea / 1e-4    // [cm/s]
+            pkbar = Pk / sarea / 1e-4       // [cm/s]
+            {celsius=37}                    // Typical human body temperature
+            g_l = Gl * 1e9 / sarea          // [S/cm^2]
+    }
+
+    // ------------------------------- DENDRITE ----------------------------- //
+    for i=0, NDEND-1 {
+	    dend[i]{
+    		nseg = 1
+    		diam = 0.7*D_den     // node diameter (um)
+    		L    = 1		 // node length (um)
+    		Ra   = rhoa*( (L + INL_dend) / L )  // trick to account for internodal resistance
+    		cm   = 2					        // specific membrane capacitance (uF/cm^2)
+    	  insert extracellular   // for extracellular stimulation
+          insert fh
+                nai=10  nao=142  ki=141 ko=4.2   // [mM]
+                areafac = PI*L*diam/100		     // mamps/cm^2 to namps (units of 1e-6 cm^2)
+                xarea = 3.14 * diam * diam/4     // [um^2]
+                sarea = 3.14 * diam * L          // [um^2]
+                pnabar =  PNa / sarea / 1e-4     // [cm/s]
+                pkbar = Pk / sarea / 1e-4        // [cm/s]
+                {celsius=37}                     // Typical human body temperature
+                g_l = Gl * 1e9 / sarea           // [S/cm^2]
+    		}
+    	}
+
+    // Connect all segments
+    access soma
+    connect dend(0), soma(1)
+    for i = 1, NDEND-1 {
+        connect dend[i](0), dend[i-1](1)
+    }
+    for i = 0, NAXON-2 {
+        connect axon[i](1), axon[i+1](0)
+    }
+    connect axon[NAXON-1](1), soma(0)
+
+	finitialize(v_init)
+}
+initialize()
+
+
+/* See topology in command window [MAKE SURE TO STUDY THIS. DENDRITE NODE 0-5, SOMA
+NODE 6, AXON NODE 7-26 */
+topology()
+
+
+
+
+
+
+
+// FIND X AND Y COORDINATES FOR CURVE OF DENDRITE --------------------------- //
+tot_NODES = NDEND + NSOMA + NAXON   // total nodes in neuron
+
+// This section evaluates the length of the neuron referenced at the beginning of the axon (that is, dend[0](0) has length 0 mm.)
+objref x_neuron, y_neuron
+x_neuron = new Vector(tot_NODES,0)
+y_neuron = new Vector(tot_NODES,0)
+
+// X COORDINATES
+for i=0, tot_NODES-1{
+    if(i == 0){
+        x_neuron.x[i] = 0
+    }
+    if(i >= 1 && i <= NDEND - 1){
+        x_neuron.x[i] = x_neuron.x[i-1]+(INL_dend*cos(angle_rad*(NDEND-i)))
+    }
+    if(i == NDEND + NSOMA - 1){
+    	x_neuron.x[i] = x_neuron.x[i-1] + INL_soma
+    }
+    if(i >= NDEND + NSOMA){
+    	x_neuron.x[i] = x_neuron.x[i-1] + INL_axon
+    }
+}
+
+// Y COORDINATES
+for i = 0, tot_NODES-1{
+    if(i == 0){
+        y_neuron.x[i] = INL_dend*(sin(angle_rad*(NDEND-1))+sin(angle_rad*(NDEND-2))+sin(angle_rad*(NDEND-3))+sin(angle_rad*(NDEND-4))+sin(angle_rad*(NDEND-5)))
+    }
+    if(i == 1){
+        y_neuron.x[i] = INL_dend*(sin(angle_rad*(NDEND-2))+sin(angle_rad*(NDEND-3))+sin(angle_rad*(NDEND-4))+sin(angle_rad*(NDEND-5)))
+    }
+    if(i == 2){
+        y_neuron.x[i] = INL_dend*(sin(angle_rad*(NDEND-3))+sin(angle_rad*(NDEND-4))+sin(angle_rad*(NDEND-5)))
+    }
+    if(i == 3){
+        y_neuron.x[i] = INL_dend*(sin(angle_rad*(NDEND-4))+sin(angle_rad*(NDEND-5)))
+    }
+    if(i == 4){
+        y_neuron.x[i] = INL_dend*(sin(angle_rad*(NDEND-5)))
+    }
+    if(i >= NDEND){
+        y_neuron.x[i] = 0
+    }
+}
+
+x_neuron.mul(1e-3) //convert from um to mm
+y_neuron.mul(1e-3) //convert from um to mm
+
+
+// --------- Create vector to hold extracellular potential values ----------- //
+objref phi_e
+phi_e = new Vector(tot_NODES,0)
+
+// Vectors to hold recorded membrane potentials
+objref  soma_mem[NSOMA], axon_mem[NAXON], dend_mem[NDEND]    // objects to store voltage in soma and axon
+
+for i = 0, NSOMA-1{
+    soma_mem[i] = new Vector(tstop/dt,0)    // voltage in the soma
+    soma_mem[i].record(&soma[i].v(0.5))   // record soma voltage in middle of soma
+}
+
+for i = 0, NAXON-1{
+    axon_mem[i] = new Vector(tstop/dt,0)    // voltage in the axon
+    axon_mem[i].record(&axon[i].v(0.5))   // record soma voltage in middle of axon
+}
+
+for i = 0, NDEND-1{
+    dend_mem[i] = new Vector(tstop/dt,0)    // voltage in the dendrite
+    dend_mem[i].record(&dend[i].v(0.5))   // record soma voltage in middle of dendrite
+}
+
+
+//dummy stimulus only to control waveform parameters
+//The 'dummy' section has nothing to do with the fiber
+objref dummystim
+create dummy
+dummy dummystim = new IClamp(0.5)	// 0.5 is the normalized location
+dummystim.del = DELAY
+dummystim.dur = PW
+dummystim.amp = AMPLITUDE               // Cathodic stimulation is negative!
+
+
+
+
+
+
+
+// This section creates a new vector that rereferences the length centered at the node of stimulation.
+stimnode = 3        // This is the node you want to center the electrode over. In this situation, we are referencing node 3, or the middle of the dendrite.
+objref stim_posx
+// Subtract distance of node
+xpos = x_neuron.x[stimnode]
+stim_posx = x_neuron.c.sub(xpos)
+
+// extracellular potentials
+proc potential_field(){
+	for i=0, tot_NODES-1{
+		r = sqrt(stim_posx.x[i]^2+(E2F_DIST-y_neuron.x[i])^2) // [mm] Note that we are assuming that the electrode is at position (0,0,E2F_DIST) i.e. centered over the node specified by "pos" above
+		phi_e.x[i] = dummystim.i/(4*sigma_e*PI*r) // check units!!!!
+
+        // Note the weird indexing is due to the order that the segments are attached (see topology)
+        if(i <= NAXON - 1){
+		    axon[(NAXON-1) - i].e_extracellular(0.5) = phi_e.x[i]
+        }
+        if(i == NAXON + NSOMA - 1){
+    	    soma[0].e_extracellular(0.5) = phi_e.x[i]
+        }
+        if(i >= NAXON + NSOMA){
+    	    dend[(tot_NODES-1) - i].e_extracellular(0.5) = phi_e.x[i]
+        }
+    }
+}
+
+// time integrate with constant time step size
+proc stimulate(){
+	finitialize(v_init)
+	while (t<tstop) {
+		potential_field()
+	  fadvance()
+	}
+}
+
+// ----------------------- Plotting -----------------------------------------
+stimulate()
+objref g, rp
+g = new Graph()
+g.size(0,tstop/2,v_init-30,40)
+dend_mem[2].plot(g,dt)
+axon_mem[0].plot(g,dt,2,1)

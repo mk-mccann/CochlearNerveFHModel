@@ -1,0 +1,85 @@
+/* Frankenhaeuser-Huxley model of the cochlear nerve.
+
+Authors: Lauren Heckelman, Matthew McCann, and Michelle Mueller.
+
+This code relies on the FH mechanism written by Michael Hines, which describes the FH equation given in the original Frankenhaeuser-Huxley paper. Also referenced is the extracellular_sample.hoc code distributed by Leo Medina. Spiral ganglion cell membrane parameters taken from Frijns, et al. (1995), and Cartee (2006).
+
+The original code by Hines replicates Figures 1, 3, and 6 in the original Frankenhaeuser-Huxley paper. To validate for yourself, compile the fh.mod function and run fh.hoc.
+
+References:
+
+[1] Frankenhaeuser, B. and Huxley, A. F. (1964)
+The action potential in the myelinated nerve fibre of Xenoupus Laevis as computed
+on the basis of voltage clamp data.
+J. Physiol. 171: 302-315
+
+[2] Hines, Michael. Xenopus Myelinated Neuron (Frankenhaeuser, Huxley 1964). From http://senselab.med.yale.edu/ModelDB/showModel.cshtml?model=3507
+
+[3] Frijns, J.H.M, de Snoo, S.L., and Schoonhoven, R. (1995) Potential distributions and neural excitation patterns in a rotationally symmetric model of the electrically stimulated cochlea. Hearing Research 87: 170-186
+
+[4] Cartee, Lianne, A. (2006). Spiral ganglion cell site of excitation II: Numerical model analysis. ￼￼Hearing Research 215: 22–30
+
+
+ Note the following parameter units used by the fh.mod function:
+	v (mV)
+	celsius (degC)
+	pnabar (cm/s)
+	ppbar (cm/s)
+	pkbar (cm/s)
+	nai (mM)
+	nao (mM)
+	ki (mM)
+	ko (mM)
+	gl (S/cm2)
+	el (mV)
+*/
+
+load_proc("nrnmainmenu")
+
+proc model_globels() {
+	celsius=37
+	v_init=-70 //mV//
+    PNa = 172            // Sodium Permeability [um^3 / s]
+    Pk = 6.68            // Potassium Permeability [um^3 / s]
+    Gl = 2.43            // Leak Conductance [nS]
+// Simulation Paramters
+    PW = 0.05             // pulse width in ms
+    DELAY = 1             // in ms
+    E2F_DIST = 1          // electrode to fiber distance in mm
+    AMPLITUDE = -8.75     // cathodic [nA]
+    tstop = 10            // in ms
+    dt = 0.001
+//Axon parameters//
+	NAXON=21
+	paraX1= (NAXON-1)*2
+	paraX2=	(NAXON-1)*2
+	axoninter= (NAXON-1)*6
+	axontotal= NAXON+paraX1+paraX2+axoninter
+
+	D_axon=2
+	paralength1=3
+	nodelength=1.0
+	space_p1=0.002
+	space_p2=0.004
+	space_i=0.004
+
+// Soma Parameters
+	NSOMA=1
+	paraS1= (NAXON-1)*2
+	paraS2=	(NAXON-1)*2
+	axoninter= (NAXON-1)*6
+	axontotal= NAXON+parax1+parax2+axoninter
+
+	fiberD=2
+	paralength1=3
+	nodelength=1.0
+	space_p1=0.002
+	space_p2=0.004
+	space_i=0.004
+
+//electrical parameters//
+	rhoa=0.7e6 //Ohm-um//
+	mycm=0.1 //uF/cm2/lamella membrane//
+	mygm=0.001 //S/cm2/lamella membrane//
+	}
+model_globels ()
