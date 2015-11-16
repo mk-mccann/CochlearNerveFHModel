@@ -19,8 +19,7 @@ J. Physiol. 171: 302-315
 
 [4] Cartee, Lianne, A. (2006). Spiral ganglion cell site of excitation II: Numerical model analysis. ￼￼Hearing Research 215: 22–30
 
-
- Note the following parameter units used by the fh.mod function:
+Note the following parameter units used by the fh.mod function:
 	v (mV)
 	celsius (degC)
 	pnabar (cm/s)
@@ -36,50 +35,324 @@ J. Physiol. 171: 302-315
 
 load_proc("nrnmainmenu")
 
-proc model_globels() {
-	celsius=37
-	v_init=-70 //mV//
+// ---------------------------- Global Parameters --------------------------- //
+	celsius = 37		 // human body temperature
+	v_init = -70 		 // [mV]
     PNa = 172            // Sodium Permeability [um^3 / s]
     Pk = 6.68            // Potassium Permeability [um^3 / s]
+
+// Stimulus
+    PW = 0.05            // pulse width [ms]
+    DELAY = 1            // [ms]
+    E2F_DIST = 1         // electrode to fiber distance in mm
+    AMPLITUDE = -8.75    // cathodic [nA]
+    tstop = 10           // [ms]
+    dt = 0.001			 // [ms]
+
+// electrical parameters
+	rhoa=110e4 		 	 // Ohm-um
+	mycm=0.1 			 // uF/cm2/lamella membrane//
+	mygm=0.001 			 // S/cm2/lamella membrane//
     Gl = 2.43            // Leak Conductance [nS]
-// Simulation Paramters
-    PW = 0.05             // pulse width in ms
-    DELAY = 1             // in ms
-    E2F_DIST = 1          // electrode to fiber distance in mm
-    AMPLITUDE = -8.75     // cathodic [nA]
-    tstop = 10            // in ms
-    dt = 0.001
-//Axon parameters//
-	NAXON=21
-	paraX1= (NAXON-1)*2
-	paraX2=	(NAXON-1)*2
-	axoninter= (NAXON-1)*6
-	axontotal= NAXON+paraX1+paraX2+axoninter
 
-	D_axon=2
-	paralength1=3
-	nodelength=1.0
-	space_p1=0.002
-	space_p2=0.004
-	space_i=0.004
+// Extracellular Medium
+    sigma_e = 1/700      // [S/mm]
 
-// Soma Parameters
-	NSOMA=1
-	paraS1= (NAXON-1)*2
-	paraS2=	(NAXON-1)*2
-	axoninter= (NAXON-1)*6
-	axontotal= NAXON+parax1+parax2+axoninter
+// -------------------------------------------------------------------------- //
 
-	fiberD=2
-	paralength1=3
-	nodelength=1.0
-	space_p1=0.002
-	space_p2=0.004
-	space_i=0.004
 
-//electrical parameters//
-	rhoa=0.7e6 //Ohm-um//
-	mycm=0.1 //uF/cm2/lamella membrane//
-	mygm=0.001 //S/cm2/lamella membrane//
+
+
+// ------------------------ Morphology and Topology ------------------------- //
+
+// Fiber morphological parameters ----------------------------------------------
+	ax_fiberD = 4		// diameter of myelinated axon fiber [um]
+    dend_fiberD = 3		// diameter of myelinated dendrite fiber [um]
+	soma_fiberD = 11	// diameter of myelinated soma [um]
+
+	nodelength = 1.0	// length of all nodes of Ranvier (axon and dendrite) [um]
+
+	// Total periaxonal length is 4 um (assume same in axon and dendrite)
+	paralength1 = 1		// length of first paranodal segment [um]
+	paralength2 = 3		// length of second paranodal segment [um]
+
+	space_p1 = 0.002	// [um]
+	space_p2 = 0.004	// [um]
+	space_i = 0.004		// [um]
+
+// Axon ------------------------------------------------------------------------
+	D_axon = 2					// axon diameter [um]
+	INL_axon = 100*D_axon		// axon internodal length [um]
+	ax_paraD1 = 1.9				// diameter of periaxonal space [um]
+	ax_paraD2 = 3.4				// diameter of periaxonal space [um]
+	nl = 80						// number of myelin lamella
+
+	// topological parameters
+		NAXON = 21					// number of axon nodes
+	    para_ax1 = (NAXON-1)*2		// number of small periaxonal comaprtments
+	    para_ax2 = (NAXON-1)*2		// number of large periaxonal comaprtments
+	    axoninter = (NAXON-1)*6		// number of axon internode compartments
+	    axontotal = NAXON+para_ax1+para_ax2+axoninter
+
+		ax_Rpn0=(rhoa*.01)/(PI*((((D_axon/2)+space_p1)^2)-((D_axon/2)^2)))
+		ax_Rpn1=(rhoa*.01)/(PI*((((ax_paraD1/2)+space_p1)^2)-((ax_paraD1/2)^2)))
+		ax_Rpn2=(rhoa*.01)/(PI*((((ax_paraD2/2)+space_p2)^2)-((ax_paraD2/2)^2)))
+		ax_Rpx=(rhoa*.01)/(PI*((((D_axon/2)+space_i)^2)-((D_axon/2)^2)))
+		ax_interlength=(INL_axon-nodelength-(2*paralength1)-(2*paralength2))/6
+
+
+// Dendrite --------------------------------------------------------------------
+	D_dend = 1					// dendrite diameter [um]
+	INL_dend = 175 				// dendrite internodal length [um]
+	dend_paraD1 = 1.9			// diameter of periaxonal space [um]
+	dend_paraD2 = 3.4			// diameter of periaxonal space [um]
+	nl = 80						// number of myelin lamella
+
+	// topological parameters
+		NDEND = 5					// number of dendrite nodes
+	    para_dend1 = (NDEND-1)*2	// number of small periaxonal comaprtments
+	    para_dend2 = (NDEND-1)*2	// number of large periaxonal comaprtments
+	    dendinter= (NDEND-1)*6		// number of dendrite internode compartments
+	    dendtotal= NDEND+ax_paraD1+ax_paraD2+dendinter
+
+		dend_Rpn0=(rhoa*.01)/(PI*((((D_dend/2)+space_p1)^2)-((D_dend/2)^2)))
+		dend_Rpn1=(rhoa*.01)/(PI*((((dend_paraD1/2)+space_p1)^2)-((dend_paraD1/2)^2)))
+		dend_Rpn2=(rhoa*.01)/(PI*((((dend_paraD2/2)+space_p2)^2)-(( dend_paraD2/2)^2)))
+		dend_Rpx=(rhoa*.01)/(PI*((((D_dend/2)+space_i)^2)-((D_dend/2)^2)))
+		dend_interlength=(INL_dend-nodelength-(2*paralength1)-(2*paralength2))/6
+
+// Soma ------------------------------------------------------------------------
+	D_soma = 10					// soma diamter [um]
+	INL_soma = 50				// soma internodal length [um]
+	soma_paraD1 = 1.9
+	soma_paraD2 = 3.4
+	nl = 80
+
+	// topological parameters
+		NSOMA = 1
+		para_soma1 = (NSOMA-1)*2
+		para_soma2 = (NSOMA-1)*2
+		somainter = (NSOMA-1)*6
+		somatotal = NSOMA + para_soma1 + para_soma2 + somainter
+
+		soma_Rpn0=(rhoa*.01)/(PI*((((D_soma/2)+space_p1)^2)-((D_soma/2)^2)))
+		soma_Rpn1=(rhoa*.01)/(PI*((((soma_paraD1/2)+space_p1)^2)-((soma_paraD1/2)^2)))
+		soma_Rpn2=(rhoa*.01)/(PI*((((soma_paraD2/2)+space_p2)^2)-((soma_paraD2/2)^2)))
+		soma_Rpx=(rhoa*.01)/(PI*((((D_soma/2)+space_i)^2)-((D_soma/2)^2)))
+		soma_interlength=(INL_soma-nodelength-(2*paralength1)-(2*paralength2))/6
+
+// -------------------------------------------------------------------------- //
+
+
+// -------------------------- Create Coaxial Cable -------------------------- //
+
+objectvar stim
+
+create ax_node[NAXON], ax_MYSA[para_ax1], ax_FLUT[para_ax2], ax_STIN[axoninter]
+create soma_node[NSOMA], soma_MYSA[para_soma1], soma_FLUT[para_soma2], soma_STIN[somainter]
+create dend_node[NDEND], dend_MYSA[para_dend1], dend_FLUT[para_dend2], dend_STIN[dendinter]
+
+access ax_node[0]	//APD
+
+proc initialize(){
+
+	// AXON --------------------------------------------------------------------
+	for i=0,NAXON-1 {
+		ax_node[i]{
+			nseg = 1
+			diam = D_axon
+			L = nodelength
+			Ra = rhoa/10000
+			cm=2
+			insert fh
+            	nai=10  nao=142  ki=141  ko=4.2  // [mM]
+            	areafac = PI*L*diam/100		     // mamps/cm^2 to namps (units of 1e-6 cm^2)
+            	xarea = 3.14 * diam * diam/4     // cross sectional area [um^2]
+            	sarea = 3.14 * diam * L          // surface area of node [um^2]
+            	pnabar =  PNa / sarea / 1e-4     // [cm/s]
+            	pkbar = Pk / sarea / 1e-4        // [cm/s]
+            	g_l = Gl * 1e9 / sarea           // [S/cm^2]
+			insert extracellular xraxial=ax_Rpn0 xg=1e10 xc=0
+			}
+		}
+	for i=0, para_ax1-1 {
+		ax_MYSA[i]{
+			nseg=1
+			diam=ax_fiberD
+			L=paralength1
+			Ra=rhoa*(1/(ax_paraD1/ax_fiberD)^2)/10000
+			cm=2*ax_paraD1/ax_fiberD
+			insert pas
+			g_pas=0.001*ax_paraD1/ax_fiberD
+			e_pas= v_init
+			insert extracellular xraxial=ax_Rpn1 xg=mygm/(nl*2) xc=mycm/(nl*2)
+		}
 	}
-model_globels ()
+	for i=0, para_ax2-1 {
+		ax_FLUT[i]{
+			nseg=1
+			diam=ax_fiberD
+			L=paralength2
+			Ra=rhoa*(1/(ax_paraD2/ax_fiberD)^2)/10000
+			cm=2*ax_paraD2/ax_fiberD
+			insert pas
+			g_pas=0.0001*ax_paraD2/ax_fiberD
+			e_pa = v_init
+			insert extracellular xraxial=ax_Rpn2 xg=mygm/(nl*2) xc=mycm/(nl*2)
+		}
+	}
+	for i=0, axoninter-1 {
+		ax_STIN[i]{
+			nseg=1
+			diam=ax_fiberD
+			L=ax_interlength
+			Ra=rhoa*(1/(D_axon/ax_fiberD)^2)/10000
+			cm=2*D_axon/ax_fiberD
+			insert pas
+			g_pas=0.0001*D_axon/ax_fiberD
+			e_pas = v_init
+			insert extracellular xraxial=ax_Rpx xg=mygm/(nl*2) xc=mycm/(nl*2)
+		}
+	}
+
+
+	// SOMA --------------------------------------------------------------------
+	for i=0,NSOMA-1 {
+		soma_node[i]{
+			nseg = 1
+			diam = D_soma
+			L = nodelength
+			Ra = rhoa/10000
+			cm=2
+			insert fh
+            	nai=10  nao=142  ki=141  ko=4.2  // [mM]
+            	areafac = PI*L*diam/100		     // mamps/cm^2 to namps (units of 1e-6 cm^2)
+            	xarea = 3.14 * diam * diam/4     // cross sectional area [um^2]
+            	sarea = 3.14 * diam * L          // surface area of node [um^2]
+            	pnabar =  PNa / sarea / 1e-4     // [cm/s]
+            	pkbar = Pk / sarea / 1e-4        // [cm/s]
+            	g_l = Gl * 1e9 / sarea           // [S/cm^2]
+			insert extracellular xraxial=soma_Rpn0 xg=1e10 xc=0
+			}
+		}
+	for i=0, para_soma1-1 {
+		soma_MYSA[i]{
+			nseg=1
+			diam=soma_fiberD
+			L=paralength1
+			Ra=rhoa*(1/(soma_paraD1/soma_fiberD)^2)/10000
+			cm=2*soma_paraD1/soma_fiberD
+			insert pas
+			g_pas=0.001*soma_paraD1/soma_fiberD
+			e_pas= v_init
+			insert extracellular xraxial=soma_Rpn1 xg=mygm/(nl*2) xc=mycm/(nl*2)
+		}
+	}
+	for i=0, para_soma2-1 {
+		soma_FLUT[i]{
+			nseg=1
+			diam=soma_fiberD
+			L=paralength2
+			Ra=rhoa*(1/(soma_paraD2/soma_fiberD)^2)/10000
+			cm=2*soma_paraD2/soma_fiberD
+			insert pas
+			g_pas=0.0001*soma_paraD2/soma_fiberD
+			e_pa = v_init
+			insert extracellular xraxial=soma_Rpn2 xg=mygm/(nl*2) xc=mycm/(nl*2)
+		}
+	}
+	for i=0, somainter-1 {
+		soma_STIN[i]{
+			nseg=1
+			diam=soma_fiberD
+			L=soma_interlength
+			Ra=rhoa*(1/(D_soma/soma_fiberD)^2)/10000
+			cm=2*D_soma/soma_fiberD
+			insert pas
+			g_pas=0.0001*D_soma/soma_fiberD
+			e_pas = v_init
+			insert extracellular xraxial=soma_Rpx xg=mygm/(nl*2) xc=mycm/(nl*2)
+		}
+	}
+
+	// DENDRITE ----------------------------------------------------------------
+	for i=0,NDEND-1 {
+		dend_node[i]{
+			nseg = 1
+			diam = D_dend
+			L = nodelength
+			Ra = rhoa/10000
+			cm=2
+			insert fh
+            	nai=10  nao=142  ki=141  ko=4.2  // [mM]
+            	areafac = PI*L*diam/100		     // mamps/cm^2 to namps (units of 1e-6 cm^2)
+            	xarea = 3.14 * diam * diam/4     // cross sectional area [um^2]
+            	sarea = 3.14 * diam * L          // surface area of node [um^2]
+            	pnabar =  PNa / sarea / 1e-4     // [cm/s]
+            	pkbar = Pk / sarea / 1e-4        // [cm/s]
+            	g_l = Gl * 1e9 / sarea           // [S/cm^2]
+			insert extracellular xraxial=dend_Rpn0 xg=1e10 xc=0
+			}
+		}
+	for i=0, para_dend1-1 {
+		dend_MYSA[i]{
+			nseg=1
+			diam=dend_fiberD
+			L=paralength1
+			Ra=rhoa*(1/(dend_paraD1/dend_fiberD)^2)/10000
+			cm=2*dend_paraD1/dend_fiberD
+			insert pas
+			g_pas=0.001*dend_paraD1/dend_fiberD
+			e_pas= v_init
+			insert extracellular xraxial=dend_Rpn1 xg=mygm/(nl*2) xc=mycm/(nl*2)
+		}
+	}
+	for i=0, para_dend2-1 {
+		dend_FLUT[i]{
+			nseg=1
+			diam=dend_fiberD
+			L=paralength2
+			Ra=rhoa*(1/(dend_paraD2/dend_fiberD)^2)/10000
+			cm=2*dend_paraD2/dend_fiberD
+			insert pas
+			g_pas=0.0001*dend_paraD2/dend_fiberD
+			e_pa = v_init
+			insert extracellular xraxial=dend_Rpn2 xg=mygm/(nl*2) xc=mycm/(nl*2)
+		}
+	}
+	for i=0, dendinter-1 {
+		dend_STIN[i]{
+			nseg=1
+			diam=dend_fiberD
+			L=dend_interlength
+			Ra=rhoa*(1/(D_dend/dend_fiberD)^2)/10000
+			cm=2*D_dend/dend_fiberD
+			insert pas
+			g_pas=0.0001*D_dend/dend_fiberD
+			e_pas = v_init
+			insert extracellular xraxial=dend_Rpx xg=mygm/(nl*2) xc=mycm/(nl*2)
+		}
+	}
+
+
+	// -------------------------- CONNECT SEGMENTS -------------------------- //
+		// TODO
+
+	for i=0, NAXON-2 {
+		connect ax_MYSA[2*i](0), ax_node[i](1)
+		connect ax_FLUT[2*i](0), ax_MYSA[2*i](1)
+		connect ax_STIN[6*i](0), ax_FLUT[2*i](1)
+		connect ax_STIN[6*i+1](0), ax_STIN[6*i](1)
+		connect ax_STIN[6*i+2](0), ax_STIN[6*i+1](1)
+		connect ax_STIN[6*i+3](0), ax_STIN[6*i+2](1)
+		connect ax_STIN[6*i+4](0), ax_STIN[6*i+3](1)
+		connect ax_STIN[6*i+5](0), ax_STIN[6*i+4](1)
+		connect ax_FLUT[2*i+1](0), ax_STIN[6*i+5](1)
+		connect ax_MYSA[2*i+1](0), ax_FLUT[2*i+1](1)
+		connect ax_node[i+1](0), ax_MYSA[2*i+1](1)
+		}
+
+	finitialize(v_init)
+	fcurrent()
+}
+initialize()

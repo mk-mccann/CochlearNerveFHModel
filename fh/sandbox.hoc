@@ -19,6 +19,7 @@ J. Physiol. 171: 302-315
 
 [4] Cartee, Lianne, A. (2006). Spiral ganglion cell site of excitation II: Numerical model analysis. ￼￼Hearing Research 215: 22–30
 
+[5] McIntyre CC, Richardson AG, and Grill WM. Modeling the excitability of mammalian nerve fibers: influence of afterpotentials on the recovery cycle. Journal of Neurophysiology 87:995-1006, 2002.
 
  Note the following parameter units used by the fh.mod function:
 	v (mV)
@@ -34,41 +35,111 @@ J. Physiol. 171: 302-315
 	el (mV)
 */
 
-// ----------------------- Global Variables --------------------------------- //
 
-rhoa = 110           // axial resistivity [ohm-cm]
-v_init = -70         // initial potential [mV]
-PNa = 172            // Sodium Permeability [um^3 / s]
-Pk = 6.68            // Potassium Permeability [um^3 / s]
-Gl = 2.43            // Leak Conductance [nS]
+// -------------------------- Global Variables ------------------------------ //
 
-// Dendrite ------------------------------------------------------------------
+// Model parameters
+	celsius=37
+    v_init = -70         // initial potential [mV]
+    PNa = 172            // Sodium Permeability [um^3 / s]
+    Pk = 6.68            // Potassium Permeability [um^3 / s]
+    nai=10  nao=142  ki=141 ko=4.2  // [mM]
+
+// electrical parameters
+	rhoa=110 // Ohm-cm
+	mycm=0.1 // uF/cm2/lamella membrane//
+	mygm=0.001 //S/cm2/lamella membrane//
+    Gl = 2.43            // Leak Conductance [nS]
+
+// Extracellular Medium
+    sigma_e = 1/700       // [S/mm]
+
+// Stimulus
+    PW = 0.05             // pulse width in ms
+    DELAY = 1             // in ms
+    E2F_DIST = 1          // electrode to fiber distance in mm
+    AMPLITUDE = -8.75     // cathodic [nA]
+    tstop = 10            // in ms
+    dt = 0.001
+
+//topological parameters
+
+    // Axon
+	    NAXON=21
+	    paraX1= (NAXON-1)*2
+	    paraX2=	(NAXON-1)*2
+	    axoninter= (NAXON-1)*6
+	    axontotal= NAXON+paraX1+paraX2+axoninter
+
+    // Dendrite
+        NDEND = 5
+        paraD1 = (NDEND-1)*2
+        paraD2 = (NDEND-1)*2
+
+    // Soma
+
+
+
+// Fiber morphological parameters
+	axfiberD=4
+    dendfiberD=3
+	paralength1=3
+	nodelength=1.0
+	space_p1=0.002
+	space_p2=0.004
+	space_i=0.004
+
+// Soma morphologial parameters
+    D_soma = 10           // fiber diameter in um
+    NSOMA = 1             // number of nodes
+    INL_soma = 50         // internodal length in um
+
+// Axon morphologial parameters
+    D_axon = 2            // fiber diameter in um
+    NAXON = 21            // number of nodes
+    INL_axon = 100*D_axon // internodal length in um
+
+// Dendrite morphologial parameters
+    D_den = 1             // fiber diameter in um
+    NDEND = 5             // number of nodes
+    INL_dend = 175        // internodal length in um
+    angle_degree = 15
+    angle_rad = angle_degree*(PI/180)
+
+// -------------------------------------------------------------------------- //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Dendrite
 D_den = 1             // fiber diameter in um
 NDEND = 5             // number of nodes
 INL_dend = 175        // internodal length in um
 angle_degree = 15
 angle_rad = angle_degree*(PI/180)
 
-// Soma ----------------------------------------------------------------------
-D_soma = 10           // fiber diameter in um
-NSOMA = 1      // number of nodes
-INL_soma = 50         // internodal length in um
 
-// Axon ----------------------------------------------------------------------
-D_axon = 2            // fiber diameter in um
-NAXON = 21     // number of nodes
-INL_axon = 100*D_axon // internodal length in um
 
-// Stimulus ------------------------------------------------------------------
-PW = 0.05             // pulse width in ms
-DELAY = 1             // in ms
-E2F_DIST = 1          // electrode to fiber distance in mm
-AMPLITUDE = -8.75     // cathodic [nA]
-tstop = 10            // in ms
-dt = 0.001
 
-// Extracellular Medium
-sigma_e = 1/700       // [S/mm]
+
 
 // ----------------------- Creating Fiber ----------------------------------- //
 create axon[NAXON], soma[NSOMA], dend[NDEND]
@@ -85,14 +156,13 @@ proc initialize(){
 			cm   = 2					   // specific membrane capacitance (uF/cm^2)
         insert extracellular   // for extracellular stimulation
         insert fh
-          nai=10  nao=142  ki=141 ko=4.2  // [mM]
-          areafac = PI*L*diam/100		  // mamps/cm^2 to namps (units of 1e-6 cm^2)
-          xarea = 3.14 * diam * diam/4    // [um^2]
-          sarea = 3.14 * diam * L         // [um^2]
-          pnabar =  PNa / sarea / 1e-4    // [cm/s]
-          pkbar = Pk / sarea / 1e-4       // [cm/s]
-          {celsius=37}                    // Typical human body temperature
-          g_l = Gl * 1e9 / sarea          // [S/cm^2]
+            nai=10  nao=142  ki=141 ko=4.2  // [mM]
+            areafac = PI*L*diam/100		  // mamps/cm^2 to namps (units of 1e-6 cm^2)
+            xarea = 3.14 * diam * diam/4    // [um^2]
+            sarea = 3.14 * diam * L         // [um^2]
+            pnabar =  PNa / sarea / 1e-4    // [cm/s]
+            pkbar = Pk / sarea / 1e-4       // [cm/s]
+            g_l = Gl * 1e9 / sarea          // [S/cm^2]
 		}
 	}
 
@@ -106,12 +176,11 @@ proc initialize(){
         insert extracellular   // for extracellular stimulation
         insert fh
             nai=10  nao=142  ki=141 ko=4.2  // [mM]
-            areafac = PI*L*diam/100		    // mamps/cm^2 to namps (units of 1e-6 cm^2)
-            xarea = 3.14 * diam * diam/4    // cross sectional area [um^2]
-            sarea = 3.14 * diam * L         // surface area of node [um^2]
+            areafac = PI*L*diam/100		  // mamps/cm^2 to namps (units of 1e-6 cm^2)
+            xarea = 3.14 * diam * diam/4    // [um^2]
+            sarea = 3.14 * diam * L         // [um^2]
             pnabar =  PNa / sarea / 1e-4    // [cm/s]
             pkbar = Pk / sarea / 1e-4       // [cm/s]
-            {celsius=37}                    // Typical human body temperature
             g_l = Gl * 1e9 / sarea          // [S/cm^2]
     }
 
@@ -123,16 +192,15 @@ proc initialize(){
     		L    = 1		 // node length (um)
     		Ra   = rhoa*( (L + INL_dend) / L )  // trick to account for internodal resistance
     		cm   = 2					        // specific membrane capacitance (uF/cm^2)
-    	  insert extracellular   // for extracellular stimulation
-          insert fh
-                nai=10  nao=142  ki=141 ko=4.2   // [mM]
-                areafac = PI*L*diam/100		     // mamps/cm^2 to namps (units of 1e-6 cm^2)
-                xarea = 3.14 * diam * diam/4     // [um^2]
-                sarea = 3.14 * diam * L          // [um^2]
-                pnabar =  PNa / sarea / 1e-4     // [cm/s]
-                pkbar = Pk / sarea / 1e-4        // [cm/s]
-                {celsius=37}                     // Typical human body temperature
-                g_l = Gl * 1e9 / sarea           // [S/cm^2]
+    	insert extracellular   // for extracellular stimulation
+        insert fh
+            nai=10  nao=142  ki=141 ko=4.2  // [mM]
+            areafac = PI*L*diam/100		  // mamps/cm^2 to namps (units of 1e-6 cm^2)
+            xarea = 3.14 * diam * diam/4    // [um^2]
+            sarea = 3.14 * diam * L         // [um^2]
+            pnabar =  PNa / sarea / 1e-4    // [cm/s]
+            pkbar = Pk / sarea / 1e-4       // [cm/s]
+            g_l = Gl * 1e9 / sarea          // [S/cm^2]
     		}
     	}
 
