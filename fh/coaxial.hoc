@@ -110,14 +110,14 @@ load_proc("nrnmainmenu")
 
 	// topological parameters
 		NDEND = 5					// number of dendrite nodes
-	    para_dend1 = (NDEND-1)*2	// number of small periaxonal comaprtments
-	    para_dend2 = (NDEND-1)*2	// number of large periaxonal comaprtments
-	    dendinter= (NDEND-1)*6		// number of dendrite internode compartments
+	    para_dend1 = (NDEND)*2		// number of small periaxonal comaprtments
+	    para_dend2 = (NDEND)*2		// number of large periaxonal comaprtments
+	    dendinter= (NDEND)*6		// number of dendrite internode compartments
 	    dendtotal= NDEND+ax_paraD1+ax_paraD2+dendinter
 
 		dend_Rpn0=(rhoa*.01)/(PI*((((D_dend/2)+space_p1)^2)-((D_dend/2)^2)))
 		dend_Rpn1=(rhoa*.01)/(PI*((((dend_paraD1/2)+space_p1)^2)-((dend_paraD1/2)^2)))
-		dend_Rpn2=(rhoa*.01)/(PI*((((dend_paraD2/2)+space_p2)^2)-(( dend_paraD2/2)^2)))
+		dend_Rpn2=(rhoa*.01)/(PI*((((dend_paraD2/2)+space_p2)^2)-((dend_paraD2/2)^2)))
 		dend_Rpx=(rhoa*.01)/(PI*((((D_dend/2)+space_i)^2)-((D_dend/2)^2)))
 		dend_interlength=(INL_dend-nodelength-(2*paralength1)-(2*paralength2))/6
 
@@ -130,9 +130,15 @@ load_proc("nrnmainmenu")
 
 	// topological parameters
 		NSOMA = 1
-		para_soma1 = (NSOMA-1)*2
-		para_soma2 = (NSOMA-1)*2
-		somainter = (NSOMA-1)*6
+		if(NSOMA == 1){
+			para_soma1 = 2
+			para_soma2 = 2
+			somainter = 6
+		} else{
+			para_soma1 = (NSOMA-1)*2
+			para_soma2 = (NSOMA-1)*2
+			somainter = (NSOMA-1)*6
+		}
 		somatotal = NSOMA + para_soma1 + para_soma2 + somainter
 
 		soma_Rpn0=(rhoa*.01)/(PI*((((D_soma/2)+space_p1)^2)-((D_soma/2)^2)))
@@ -151,8 +157,6 @@ objectvar stim
 create ax_node[NAXON], ax_MYSA[para_ax1], ax_FLUT[para_ax2], ax_STIN[axoninter]
 create soma_node[NSOMA], soma_MYSA[para_soma1], soma_FLUT[para_soma2], soma_STIN[somainter]
 create dend_node[NDEND], dend_MYSA[para_dend1], dend_FLUT[para_dend2], dend_STIN[dendinter]
-
-access ax_node[0]	//APD
 
 proc initialize(){
 
@@ -336,7 +340,48 @@ proc initialize(){
 
 
 	// -------------------------- CONNECT SEGMENTS -------------------------- //
-		// TODO
+
+	for i=0, NDEND-1 {
+		if (i <= NDEND-2){
+			connect dend_MYSA[2*i](0), dend_node[i](1)
+			connect dend_FLUT[2*i](0), dend_MYSA[2*i](1)
+			connect dend_STIN[6*i](0), dend_FLUT[2*i](1)
+			connect dend_STIN[6*i+1](0), dend_STIN[6*i](1)
+			connect dend_STIN[6*i+2](0), dend_STIN[6*i+1](1)
+			connect dend_STIN[6*i+3](0), dend_STIN[6*i+2](1)
+			connect dend_STIN[6*i+4](0), dend_STIN[6*i+3](1)
+			connect dend_STIN[6*i+5](0), dend_STIN[6*i+4](1)
+			connect dend_FLUT[2*i+1](0), dend_STIN[6*i+5](1)
+			connect dend_MYSA[2*i+1](0), dend_FLUT[2*i+1](1)
+			connect dend_node[i+1](0), dend_MYSA[2*i+1](1)
+		} else{
+			connect dend_MYSA[2*i](0), dend_node[i](1)
+			connect dend_FLUT[2*i](0), dend_MYSA[2*i](1)
+			connect dend_STIN[6*i](0), dend_FLUT[2*i](1)
+			connect dend_STIN[6*i+1](0), dend_STIN[6*i](1)
+			connect dend_STIN[6*i+2](0), dend_STIN[6*i+1](1)
+			connect dend_STIN[6*i+3](0), dend_STIN[6*i+2](1)
+			connect dend_STIN[6*i+4](0), dend_STIN[6*i+3](1)
+			connect dend_STIN[6*i+5](0), dend_STIN[6*i+4](1)
+			connect dend_FLUT[2*i+1](0), dend_STIN[6*i+5](1)
+			connect dend_MYSA[2*i+1](0), dend_FLUT[2*i+1](1)
+			}
+		}
+
+	connect soma_node[0](0), dend_MYSA[para_dend1-1](1)
+
+		connect soma_MYSA[0](0), soma_node[0](1)
+		connect soma_FLUT[0](0), soma_MYSA[0](1)
+		connect soma_STIN[0](0), soma_FLUT[0](1)
+		connect soma_STIN[1](0), soma_STIN[0](1)
+		connect soma_STIN[2](0), soma_STIN[1](1)
+		connect soma_STIN[3](0), soma_STIN[2](1)
+		connect soma_STIN[4](0), soma_STIN[3](1)
+		connect soma_STIN[5](0), soma_STIN[4](1)
+		connect soma_FLUT[1](0), soma_STIN[5](1)
+		connect soma_MYSA[1](0), soma_FLUT[1](1)
+
+	connect ax_node[0](0), soma_MYSA[para_soma1-1](1)
 
 	for i=0, NAXON-2 {
 		connect ax_MYSA[2*i](0), ax_node[i](1)
@@ -353,6 +398,7 @@ proc initialize(){
 		}
 
 	finitialize(v_init)
-	fcurrent()
 }
 initialize()
+
+topology()
