@@ -427,10 +427,10 @@ for i=0, tot_NODES-1{
     if(i >= 1 && i <= NDEND - 1){
         x_neuron.x[i] = x_neuron.x[i-1]+(INL_dend*cos(angle_rad*(NDEND-i)))
     }
-    if(i == NDEND + NSOMA - 1){
+    if(i >= NDEND && i <= NDEND + NSOMA){
     	x_neuron.x[i] = x_neuron.x[i-1] + INL_soma
     }
-    if(i >= NDEND + NSOMA){
+    if(i > NDEND + NSOMA){
     	x_neuron.x[i] = x_neuron.x[i-1] + INL_axon
     }
 }
