@@ -87,8 +87,8 @@ load_proc("nrnmainmenu")
 // Axon ------------------------------------------------------------------------
 	D_axon = 2					// axon diameter [um]
 	INL_axon = 100*D_axon		// axon internodal length [um]
-	ax_paraD1 = 1.9				// diameter of periaxonal space [um]
-	ax_paraD2 = 3.4				// diameter of periaxonal space [um]
+	ax_paraD1 = 1.004				// diameter of periaxonal space [um]
+	ax_paraD2 = 2.008			// diameter of periaxonal space [um]
 	nl = 80						// number of myelin lamella
 
 	// topological parameters
@@ -108,8 +108,8 @@ load_proc("nrnmainmenu")
 // Dendrite --------------------------------------------------------------------
 	D_dend = 1					// dendrite diameter [um]
 	INL_dend = 175 				// dendrite internodal length [um]
-	dend_paraD1 = 1.9			// diameter of periaxonal space [um]
-	dend_paraD2 = 3.4			// diameter of periaxonal space [um]
+	dend_paraD1 = 1.004			// diameter of periaxonal space [um]
+	dend_paraD2 = 1.008		    // diameter of periaxonal space [um]
 	nl = 80						// number of myelin lamella
 
 	// topological parameters
@@ -131,8 +131,8 @@ load_proc("nrnmainmenu")
 // Soma ------------------------------------------------------------------------
 	D_soma = 10					// soma diamter [um]
 	INL_soma = 50				// soma internodal length [um]
-	soma_paraD1 = 1.9
-	soma_paraD2 = 3.4
+	soma_paraD1 = 1.004
+	soma_paraD2 = 10.008
 	nl = 80
 
 	// topological parameters
