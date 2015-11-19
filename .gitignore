@@ -1,7 +1,5 @@
 x86_64/
 
-x86_64/
-
 x86_64/special
 
 x86_64/fh.c
@@ -11,3 +9,5 @@ x86_64/.libs/mod_func.o
 x86_64/.libs/libnrnmech.0.so
 
 x86_64/.libs/fh.o
+
+x86_64/special
