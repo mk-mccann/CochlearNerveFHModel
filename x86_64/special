@@ -10,8 +10,4 @@ if test "" = "yes" ; then
 else
 	NRNIV="${NRNBIN}nrniv"
 fi
-<<<<<<< Updated upstream
-"${NRNIV}" -dll "/Users/matthewmccann/Documents/Code/CochlearNerveFHModel/x86_64/.libs/libnrnmech.so" "$@"
-=======
 "${NRNIV}" -dll "/Users/michellemueller/Documents/BME 504/Final Project/CochlearNerveFHModel/x86_64/.libs/libnrnmech.so" "$@"
->>>>>>> Stashed changes
