@@ -71,7 +71,7 @@ load_proc("nrnmainmenu")
 
 // Fiber morphological parameters ----------------------------------------------
 	ax_fiberD = 4		// diameter of myelinated axon fiber [um]
-    dend_fiberD = 3		// diameter of myelinated dendrite fiber [um]
+    //dend_fiberD = 3		// diameter of myelinated dendrite fiber [um]
 	soma_fiberD = 11	// diameter of myelinated soma [um]
 
 	nodelength = 1.0	// length of all nodes of Ranvier (axon and dendrite) [um]
@@ -105,7 +105,7 @@ load_proc("nrnmainmenu")
 		ax_interlength=(INL_axon-nodelength-(2*paralength1)-(2*paralength2))/6
 
 
-// Dendrite --------------------------------------------------------------------
+/* Dendrite --------------------------------------------------------------------
 	D_dend = 1					// dendrite diameter [um]
 	INL_dend = 175 				// dendrite internodal length [um]
 	dend_paraD1 = 1.004			// diameter of periaxonal space [um]
@@ -127,6 +127,7 @@ load_proc("nrnmainmenu")
 		dend_Rpn2=(rhoa*.01)/(PI*((((dend_paraD2/2)+space_p2)^2)-((dend_paraD2/2)^2)))
 		dend_Rpx=(rhoa*.01)/(PI*((((D_dend/2)+space_i)^2)-((D_dend/2)^2)))
 		dend_interlength=(INL_dend-nodelength-(2*paralength1)-(2*paralength2))/6
+*/
 
 // Soma ------------------------------------------------------------------------
 	D_soma = 10					// soma diamter [um]
@@ -137,9 +138,9 @@ load_proc("nrnmainmenu")
 
 	// topological parameters
 		NSOMA = 1
-		para_soma1 = NSOMA*3
-		para_soma2 = NSOMA*3
-		somainter = NSOMA*12
+		para_soma1 = NSOMA*2
+		para_soma2 = NSOMA*2
+		somainter = NSOMA*6
 		somatotal = NSOMA + para_soma1 + para_soma2 + somainter
 
 		soma_Rpn0=(rhoa*.01)/(PI*((((D_soma/2)+space_p1)^2)-((D_soma/2)^2)))
@@ -157,7 +158,7 @@ objectvar stim
 
 create ax_node[NAXON], ax_MYSA[para_ax1], ax_FLUT[para_ax2], ax_STIN[axoninter]
 create soma_node[NSOMA], soma_MYSA[para_soma1], soma_FLUT[para_soma2], soma_STIN[somainter]
-create dend_node[NDEND], dend_MYSA[para_dend1], dend_FLUT[para_dend2], dend_STIN[dendinter]
+//create dend_node[NDEND], dend_MYSA[para_dend1], dend_FLUT[para_dend2], dend_STIN[dendinter]
 
 proc initialize(){
 
@@ -280,7 +281,7 @@ proc initialize(){
 		}
 	}
 
-
+	/*
 	// DENDRITE ----------------------------------------------------------------
 	for i=0,NDEND-1 {
 		dend_node[i]{
@@ -339,8 +340,8 @@ proc initialize(){
 			insert extracellular xraxial=dend_Rpx xg=mygm/(nl*2) xc=mycm/(nl*2)
 		}
 	}
-
-
+	*/
+	/*
 	// -------------------------- CONNECT SEGMENTS -------------------------- //
 
 	for i=0, NDEND-1 {
@@ -363,25 +364,18 @@ proc initialize(){
 		}
 
 	connect soma_STIN[0](0), dend_FLUT[para_dend1-1](1)
-
+	*/
+		connect soma_MYSA[0](0), soma_node[0](1)
+		connect soma_FLUT[0](0), soma_MYSA[0](1)
+		connect soma_STIN[0](0), soma_FLUT[0](1)
 		connect soma_STIN[1](0), soma_STIN[0](1)
 		connect soma_STIN[2](0), soma_STIN[1](1)
 		connect soma_STIN[3](0), soma_STIN[2](1)
 		connect soma_STIN[4](0), soma_STIN[3](1)
 		connect soma_STIN[5](0), soma_STIN[4](1)
-		connect soma_FLUT[0](0), soma_STIN[5](1)
-		connect soma_MYSA[0](0), soma_FLUT[0](1)
-		connect soma_node[0](0), soma_MYSA[0](1)
-		connect soma_MYSA[1](0), soma_node[0](1)
-		connect soma_FLUT[1](0), soma_MYSA[1](1)
-		connect soma_STIN[6](0), soma_FLUT[1](1)
-		connect soma_STIN[7](0), soma_STIN[6](1)
-		connect soma_STIN[8](0), soma_STIN[7](1)
-		connect soma_STIN[9](0), soma_STIN[8](1)
-		connect soma_STIN[10](0), soma_STIN[9](1)
-		connect soma_STIN[11](0), soma_STIN[10](1)
-		connect soma_FLUT[2](0), soma_STIN[11](1)
-		connect soma_MYSA[2](0), soma_FLUT[2](1)
+		connect soma_FLUT[1](0), soma_STIN[5](1)
+		connect soma_MYSA[1](0), soma_FLUT[1](1)
+
 
 	connect ax_node[0](0), soma_MYSA[para_soma1-1](1)
 
@@ -412,7 +406,8 @@ topology()
 
 
 // ------------ FIND X AND Y COORDINATES FOR CURVE OF DENDRITE -------------- //
-tot_NODES = NDEND + NSOMA + NAXON   // total nodes in neuron
+//tot_NODES = NDEND + NSOMA + NAXON   // total nodes in neuron
+tot_NODES = NSOMA + NAXON   // total nodes in neuron
 
 // This section evaluates the length of the neuron referenced at the beginning of the axon (that is, dend[0](0) has length 0 mm.)
 objref x_neuron, y_neuron
@@ -421,7 +416,9 @@ y_neuron = new Vector(tot_NODES,0)
 
 // X COORDINATES
 for i=0, tot_NODES-1{
-    if(i == 0){
+	x_neuron.x[i] = 0
+    /*
+	if(i == 0){
         x_neuron.x[i] = 0
     }
     if(i >= 1 && i <= NDEND - 1){
@@ -433,11 +430,14 @@ for i=0, tot_NODES-1{
     if(i > NDEND + NSOMA){
     	x_neuron.x[i] = x_neuron.x[i-1] + INL_axon
     }
+	*/
 }
 
 // Y COORDINATES
 for i = 0, tot_NODES-1{
-    if(i == 0){
+	y_neuron.x[i] = 0
+    /*
+	if(i == 0){
         y_neuron.x[i] = INL_dend*(sin(angle_rad*(NDEND-1))+sin(angle_rad*(NDEND-2))+sin(angle_rad*(NDEND-3))+sin(angle_rad*(NDEND-4))+sin(angle_rad*(NDEND-5)))
     }
     if(i == 1){
@@ -455,6 +455,7 @@ for i = 0, tot_NODES-1{
     if(i >= NDEND){
         y_neuron.x[i] = 0
     }
+	*/
 }
 
 x_neuron.mul(1e-3) //convert from um to mm
@@ -466,7 +467,7 @@ objref phi_e
 phi_e = new Vector(tot_NODES,0)
 
 // Vectors to hold recorded membrane potentials at the nodes
-objref  soma_mem[NSOMA], axon_mem[NAXON], dend_mem[NDEND]    // objects to store voltage in soma and axon
+objref  soma_mem[NSOMA], axon_mem[NAXON] //dend_mem[NDEND]    // objects to store voltage in soma and axon
 
 for i = 0, NSOMA-1{
     soma_mem[i] = new Vector(tstop/dt,0)    // voltage in the soma
@@ -478,11 +479,11 @@ for i = 0, NAXON-1{
     axon_mem[i].record(&ax_node[i].v(0.5))   // record soma voltage in middle of axon
 }
 
-for i = 0, NDEND-1{
+/*for i = 0, NDEND-1{
     dend_mem[i] = new Vector(tstop/dt,0)    // voltage in the dendrite
     dend_mem[i].record(&dend_node[i].v(0.5))   // record soma voltage in middle of dendrite
 }
-
+*/
 
 //dummy stimulus only to control waveform parameters
 //The 'dummy' section has nothing to do with the fiber
@@ -510,7 +511,14 @@ proc potential_field(){
 		r = sqrt(stim_posx.x[i]^2+(E2F_DIST-y_neuron.x[i])^2) // [mm] Note that we are assuming that the electrode is at position (0,0,E2F_DIST) i.e. centered over the node specified by "stimnode" above
 		phi_e.x[i] = dummystim.i/(4*sigma_e*PI*r) // check units!!!!
 
-        if(i <= NDEND - 1){
+        if(i == NSOMA - 1){
+    	    soma_node[i].e_extracellular(0.5) = phi_e.x[i]
+        }
+        if(i >= NSOMA){
+    	    ax_node[i - NSOMA].e_extracellular(0.5) = phi_e.x[i]
+        }
+
+        /*if(i <= NDEND - 1){
 		    dend_node[i].e_extracellular(0.5) = phi_e.x[i]
         }
         if(i == NDEND + NSOMA - 1){
@@ -519,6 +527,7 @@ proc potential_field(){
         if(i >= NDEND + NSOMA){
     	    ax_node[i - (NDEND+NSOMA)].e_extracellular(0.5) = phi_e.x[i]
         }
+		*/
     }
 }
 
@@ -536,5 +545,5 @@ stimulate()
 objref g
 g = new Graph()
 g.size(0,tstop/2,v_init-30,40)
-dend_mem[2].plot(g,dt)
+//dend_mem[2].plot(g,dt)
 axon_mem[0].plot(g,dt,2,1)
