@@ -416,7 +416,15 @@ y_neuron = new Vector(tot_NODES,0)
 
 // X COORDINATES
 for i=0, tot_NODES-1{
-	x_neuron.x[i] = 0
+	if(i == 0){
+        x_neuron.x[i] = 0
+    }
+	if(i == NSOMA){
+    	x_neuron.x[i] = x_neuron.x[i-1] + INL_soma
+    }
+    if(i > NSOMA){
+    	x_neuron.x[i] = x_neuron.x[i-1] + INL_axon
+    }
     /*
 	if(i == 0){
         x_neuron.x[i] = 0
