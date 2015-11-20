@@ -1,0 +1,19 @@
+The variable stimnode is the absolute reference from node 0 (that is, dend[0]) the topology of the fiber goes dend[0-4],soma[0],axon[0-20], so make sure the node you pick falls between numbers [0-27]
+
+For Lauren, your fibers goes soma[0],axon[0-20], so make sure the node you pick falls between numbers [0-22]
+
+Stimulate at these nodes (add more if you think it's necessary)
+dend[0]
+dend[2]
+soma[0]
+axon[0]
+axon[10]
+axon[20]
+
+Record at these nodes:
+dend[0]
+dend[2]
+soma[0]
+axon[0]
+axon[10]
+axon[20]
