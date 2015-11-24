@@ -531,35 +531,28 @@ proc stimulate(){
 	}
 }
 
-objref neur_volt[tot_NODES]
-proc findmax() {
-	stimulate()
-	for i = 0, tot_NODES-1{
-        if(i <= NDEND - 1){
-		    neur_volt[i]= dend_mem.x[i].max()
-        }
-        if(i == NDEND + NSOMA - 1){
-		    neur_volt[i]= soma_mem.x[0].max()
-        }
-        if(i >= NDEND + NSOMA){
-		    neur_volt[i]= axon_mem.x[i-(NDEND + NSOMA)].max()
-        }
+proc think(){
+	while (dend_mem[2].max() < 0 || soma_mem[0].max() < 0 || axon_mem[0].max() < 0 || axon_mem[10].max() < 0 || axon_mem[20].max() < 0){
+		AMPLITUDE -= 0.1
+		dummystim.amp = AMPLITUDE
+		stimulate()
+		dend_mem[2]
+		soma_mem[0]
+		axon_mem[0]
+		axon_mem[10]
+		axon_mem[20]
+
+		if (dend_mem[2].max() < 0 || soma_mem[0].max() > 0 || axon_mem[0].max() > 0 || axon_mem[10].max() > 0 || axon_mem[20].max() > 0){
+			break
+		}
 	}
+	print AMPLITUDE
 }
 
-objref thresh
-proc bigloop(){
-	while (neur_volt[stimnode].max() <= 0){
-		AMPLITUDE = AMPLITUDE - 0.01
-		findmax()
-	}
-	thresh = AMPLITUDE
-	print thresh
-}
 
 // ----------------------- Run Sim -----------------------------------------
-bigloop()
-
+stimulate()
+think()
 
 // ----------------------- Plotting -----------------------------------------
 

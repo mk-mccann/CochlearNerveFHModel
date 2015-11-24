@@ -531,8 +531,31 @@ proc stimulate(){
 	}
 }
 
-// ----------------------- Plotting -----------------------------------------
+proc think(){
+	while (dend_mem[2].max() < 0 || soma_mem[0].max() < 0 || axon_mem[0].max() < 0 || axon_mem[10].max() < 0 || axon_mem[20].max() < 0){
+		AMPLITUDE -= 0.1
+		dummystim.amp = AMPLITUDE
+		stimulate()
+		dend_mem[2]
+		soma_mem[0]
+		axon_mem[0]
+		axon_mem[10]
+		axon_mem[20]
+
+		if (dend_mem[2].max() < 0 || soma_mem[0].max() > 0 || axon_mem[0].max() > 0 || axon_mem[10].max() > 0 || axon_mem[20].max() > 0){
+			break
+		}
+	}
+	print AMPLITUDE
+}
+
+
+// ----------------------- Run Sim -----------------------------------------
 stimulate()
+think()
+
+
+// ----------------------- Plotting -----------------------------------------
 objref g
 g = new Graph()
 g.size(0,tstop/2,v_init-30,40)
