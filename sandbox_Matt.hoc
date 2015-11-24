@@ -50,7 +50,7 @@ load_proc("nrnmainmenu")
     PW = 0.05            // pulse width [ms]
     DELAY = 1            // [ms]
     E2F_DIST = 1         // electrode to fiber distance in mm
-    AMPLITUDE = -8.75    // cathodic [nA]
+    AMPLITUDE = -7.7    // cathodic [nA]
     tstop = 10           // [ms]
     dt = 0.001			 // [ms]
 
@@ -403,7 +403,7 @@ proc initialize(){
 }
 initialize()
 
-topology()
+//topology()
 
 // -------------------------------------------------------------------------- //
 
@@ -469,18 +469,18 @@ phi_e = new Vector(tot_NODES,0)
 objref  soma_mem[NSOMA], axon_mem[NAXON], dend_mem[NDEND]    // objects to store voltage in soma and axon
 
 for i = 0, NSOMA-1{
-    soma_mem[i] = new Vector(tstop/dt,0)    // voltage in the soma
-    soma_mem[i].record(&soma_node[i].v(0.5))   // record soma voltage in middle of soma
+    soma_mem[i] = new Vector(tstop/dt,0)    	// voltage in the soma
+    soma_mem[i].record(&soma_node[i].v(0.5))    // record soma voltage in middle of soma
 }
 
 for i = 0, NAXON-1{
-    axon_mem[i] = new Vector(tstop/dt,0)    // voltage in the axon
-    axon_mem[i].record(&ax_node[i].v(0.5))   // record soma voltage in middle of axon
+    axon_mem[i] = new Vector(tstop/dt,0)     	// voltage in the axon
+    axon_mem[i].record(&ax_node[i].v(0.5))  	// record soma voltage in middle of axon
 }
 
 for i = 0, NDEND-1{
-    dend_mem[i] = new Vector(tstop/dt,0)    // voltage in the dendrite
-    dend_mem[i].record(&dend_node[i].v(0.5))   // record soma voltage in middle of dendrite
+    dend_mem[i] = new Vector(tstop/dt,0)    	// voltage in the dendrite
+    dend_mem[i].record(&dend_node[i].v(0.5))    // record soma voltage in middle of dendrite
 }
 
 
@@ -500,9 +500,9 @@ dummystim.amp = AMPLITUDE               // Cathodic stimulation is negative!
 stimnode = 3        // This is the node you want to center the electrode over. In this situation, we are referencing node 3, or the center node of the dendrite.
 
 objref stim_posx
-
 xpos = x_neuron.x[stimnode]		 // Find position of desired node
 stim_posx = x_neuron.c.sub(xpos) // Subtract distance of node
+
 
 // extracellular potentials
 proc potential_field(){
@@ -531,10 +531,49 @@ proc stimulate(){
 	}
 }
 
+objref neur_volt[tot_NODES]
+proc findmax() {
+	stimulate()
+	for i = 0, tot_NODES-1{
+        if(i <= NDEND - 1){
+		    neur_volt[i]= dend_mem.x[i].max()
+        }
+        if(i == NDEND + NSOMA - 1){
+		    neur_volt[i]= soma_mem.x[0].max()
+        }
+        if(i >= NDEND + NSOMA){
+		    neur_volt[i]= axon_mem.x[i-(NDEND + NSOMA)].max()
+        }
+	}
+}
+
+objref thresh
+proc bigloop(){
+	while (neur_volt[stimnode].max() <= 0){
+		AMPLITUDE = AMPLITUDE - 0.01
+		findmax()
+	}
+	thresh = AMPLITUDE
+	print thresh
+}
+
+// ----------------------- Run Sim -----------------------------------------
+bigloop()
+
+
 // ----------------------- Plotting -----------------------------------------
-stimulate()
-objref g
-g = new Graph()
-g.size(0,tstop/2,v_init-30,40)
-dend_mem[2].plot(g,dt)
-axon_mem[0].plot(g,dt,2,1)
+
+objref g1, g2, g3
+g1 = new Graph()
+g1.size(0,3,v_init-10,40)
+dend_mem[0].plot(g1,dt)
+
+g2 = new Graph()
+g2.size(0,3,v_init-10,40)
+soma_mem[0].plot(g2,dt)
+
+g3 = new Graph()
+g3.size(0,3,v_init-10,40)
+axon_mem[0].plot(g3,dt)
+axon_mem[10].plot(g3,dt)
+axon_mem[20].plot(g3,dt)
