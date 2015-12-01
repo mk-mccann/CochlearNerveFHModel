@@ -136,14 +136,19 @@ legend('Conductance=0.005, Dendrite', 'Conductance=0.005, Axon', 'Conductance=0.
     'Conductance=0.05, Dendrite','Conductance=0.05, Axon','Conductance=0.1, Dendrite','Conductance=0.1, Axon Node 0','Conductance=0.1, Axon Node 20')
 
 figure()
-da 0.001	0.002	0.005	0.01	0.02	0.05	0.1	0.2
+d=[0.001	0.002	0.005	0.01	0.02	0.05	0.1	0.2
 -4.1	-3.7	-2.8	-2	-1.3	-0.8	-0.6	-0.5
--4.1	-3.7	-2.8	-2	-1.3	-0.9	-0.8	
+-4.1	-3.7	-2.8	-2	-1.3	-0.9	-0.8	nan
 -6.3	-5.7	-4.2	-2.9	-1.8	-1.1	-0.8	-0.7
 -6.3	-5.7	-4.2	-2.9	-1.8	-1.1	-0.8	-0.7
--6.3	-5.7	-4.2	-2.9	-1.8	-1.7	-1.5	
--6.3	-5.7	-4.2	-2.9	-1.8	-1	-2.4	
-
+-6.3	-5.7	-4.2	-2.9	-1.8	-1.7	-1.5	nan
+-6.3	-5.7	-4.2	-2.9	-1.8	-1	-2.4	nan];
+c=d(1,:);
+semilogx(c,d(2,:),c,d(3,:),c,d(4,:),c,d(5,:),c,d(6,:),c,d(7,:))
+xlabel('Conductance','FontSize',14)
+ylabel('Threshold','FontSize',14)
+title('Semilog Plot of Threshold vs. Conductance for Stimulus at First Axon Node','FontSize',14)
+legend('dend[0]', 'dend[2]', 'soma[0]', 'axon[0]', 'axon[10]', 'axon[20]')
 
 
 %% Fiber missing dendrite 
