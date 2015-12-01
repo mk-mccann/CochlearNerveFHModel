@@ -50,7 +50,7 @@ load_proc("nrnmainmenu")
     PW = 0.05            // pulse width [ms]
     DELAY = 1            // [ms]
     E2F_DIST = 1         // electrode to fiber distance in mm
-    AMPLITUDE = -2    // cathodic [nA]
+    AMPLITUDE = -3.5    // cathodic [nA]
     tstop = 10           // [ms]
     dt = 0.001			 // [ms]
 
@@ -425,7 +425,7 @@ for i=0, tot_NODES-1{
         x_neuron.x[i] = 0
     }
     if(i >= 1 && i <= NDEND - 1){
-        x_neuron.x[i] = x_neuron.x[i-1]+(INL_dend*cos(angle_rad*(NDEND-i)))
+        x_neuron.x[i] = x_neuron.x[i-1]+INL_dend
     }
     if(i >= NDEND && i <= NDEND + NSOMA){
     	x_neuron.x[i] = x_neuron.x[i-1] + INL_soma
@@ -436,6 +436,7 @@ for i=0, tot_NODES-1{
 }
 
 // Y COORDINATES
+/*
 for i = 0, tot_NODES-1{
     if(i == 0){
         y_neuron.x[i] = INL_dend*(sin(angle_rad*(NDEND-1))+sin(angle_rad*(NDEND-2))+sin(angle_rad*(NDEND-3))+sin(angle_rad*(NDEND-4))+sin(angle_rad*(NDEND-5)))
@@ -456,9 +457,13 @@ for i = 0, tot_NODES-1{
         y_neuron.x[i] = 0
     }
 }
+*/
 
 x_neuron.mul(1e-3) //convert from um to mm
-y_neuron.mul(1e-3) //convert from um to mm
+//y_neuron.mul(1e-3) //convert from um to mm
+
+// -------------------------------------------------------------------------- //
+
 
 // ------------------------ Stimulation ------------------------------------- //
 
@@ -497,19 +502,23 @@ dummystim.dur = PW
 dummystim.amp = AMPLITUDE               // Cathodic stimulation is negative!
 
 
+// -------------------------------------------------------------------------- //
+
 // This section creates a new vector that rereferences the length centered at the node of stimulation.
 
-stimnode = 26        // This is the node you want to center the electrode over. In this situation, we are referencing node 3, or the center node of the dendrite.
+stimnode = 26       // This is the node you want to center the electrode over. In this situation, we are referencing node 3, or the center node of the dendrite.
 
 objref stim_posx
 xpos = x_neuron.x[stimnode]		 // Find position of desired node
 stim_posx = x_neuron.c.sub(xpos) // Subtract distance of node
 
+// -------------------------------------------------------------------------- //
+
 
 // extracellular potentials
 proc potential_field(){
 	for i=0, tot_NODES-1{
-		r = sqrt(stim_posx.x[i]^2+(E2F_DIST-y_neuron.x[i])^2) // [mm] Note that we are assuming that the electrode is at position (0,0,E2F_DIST) i.e. centered over the node specified by "stimnode" above
+		r = sqrt(stim_posx.x[i]^2+E2F_DIST^2) // [mm] Note that we are assuming that the electrode is at position (0,0,E2F_DIST) i.e. centered over the node specified by "stimnode" above
 		phi_e.x[i] = dummystim.i/(4*sigma_e*PI*r) // check units!!!!
 
         if(i <= NDEND - 1){
