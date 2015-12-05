@@ -87,7 +87,7 @@ load_proc("nrnmainmenu")
 // Axon ------------------------------------------------------------------------
 	D_axon = 2					// axon diameter [um]
 	INL_axon = 100*D_axon		// axon internodal length [um]
-	ax_paraD1 = 1.004			// diameter of periaxonal space [um]
+	ax_paraD1 = 2.004			// diameter of periaxonal space [um]
 	ax_paraD2 = 2.008			// diameter of periaxonal space [um]
 	nl = 80						// number of myelin lamella
 
@@ -114,7 +114,7 @@ load_proc("nrnmainmenu")
 
 	// topological parameters
 		NDEND = 5					// number of dendrite nodes
-	    para_dend1 = (NDEND)*2 - 1		// number of small periaxonal comaprtments
+	    para_dend1 = (NDEND)*2 - 1	// number of small periaxonal comaprtments
 	    para_dend2 = (NDEND)*2 - 1	// number of large periaxonal comaprtments
 	    dendinter= (NDEND-1)*6		// number of dendrite internode compartments
 	    dendtotal= NDEND+ax_paraD1+ax_paraD2+dendinter
@@ -131,9 +131,9 @@ load_proc("nrnmainmenu")
 // Soma ------------------------------------------------------------------------
 	D_soma = 10					// soma diamter [um]
 	INL_soma = 20				// soma internodal length [um]
-	soma_paraD1 = 1.004
-	soma_paraD2 = 10.008
-	nl = 80
+	soma_paraD1 = 10.004 		// diameter of periaxonal space [um]
+	soma_paraD2 = 10.008		// diameter of periaxonal space [um]
+	nl = 80				   	    // number of myelin lamella
 
 	// topological parameters
 		NSOMA = 1
@@ -485,6 +485,7 @@ for i = 0, NDEND-1{
     dend_mem[i].record(&dend_node[i].v(0.5))    // record soma voltage in middle of dendrite
 }
 
+// -------------------------------------------------------------------------- //
 
 
 //dummy stimulus only to control waveform parameters --------------------------
@@ -499,7 +500,7 @@ dummystim.amp = AMPLITUDE               // Cathodic stimulation is negative!
 
 // This section creates a new vector that rereferences the length centered at the node of stimulation.
 
-stimnode = 26        // This is the node you want to center the electrode over. In this situation, we are referencing node 3, or the center node of the dendrite.
+stimnode = 3        // This is the node you want to center the electrode over. In this situation, we are referencing node 3, or the center node of the dendrite.
 
 objref stim_posx
 xpos = x_neuron.x[stimnode]		 // Find position of desired node

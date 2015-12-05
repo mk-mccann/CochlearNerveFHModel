@@ -50,7 +50,7 @@ load_proc("nrnmainmenu")
     PW = 0.05            // pulse width [ms]
     DELAY = 1            // [ms]
     E2F_DIST = 1         // electrode to fiber distance in mm
-    AMPLITUDE = -4   // cathodic [nA]
+    AMPLITUDE = -2    // cathodic [nA]
     tstop = 10           // [ms]
     dt = 0.001			 // [ms]
 
@@ -71,7 +71,7 @@ load_proc("nrnmainmenu")
 
 // Fiber morphological parameters ----------------------------------------------
 	ax_fiberD = 4		// diameter of myelinated axon fiber [um]
-    //dend_fiberD = 3		// diameter of myelinated dendrite fiber [um]
+    dend_fiberD = 3		// diameter of myelinated dendrite fiber [um]
 	soma_fiberD = 11	// diameter of myelinated soma [um]
 
 	nodelength = 1.0	// length of all nodes of Ranvier (axon and dendrite) [um]
@@ -87,7 +87,7 @@ load_proc("nrnmainmenu")
 // Axon ------------------------------------------------------------------------
 	D_axon = 2					// axon diameter [um]
 	INL_axon = 100*D_axon		// axon internodal length [um]
-	ax_paraD1 = 1.004			// diameter of periaxonal space [um]
+	ax_paraD1 = 2.004			// diameter of periaxonal space [um]
 	ax_paraD2 = 2.008			// diameter of periaxonal space [um]
 	nl = 80						// number of myelin lamella
 
@@ -105,7 +105,7 @@ load_proc("nrnmainmenu")
 		ax_interlength=(INL_axon-nodelength-(2*paralength1)-(2*paralength2))/6
 
 
-/* Dendrite --------------------------------------------------------------------
+// Dendrite --------------------------------------------------------------------
 	D_dend = 1					// dendrite diameter [um]
 	INL_dend = 175 				// dendrite internodal length [um]
 	dend_paraD1 = 1.004			// diameter of periaxonal space [um]
@@ -114,7 +114,7 @@ load_proc("nrnmainmenu")
 
 	// topological parameters
 		NDEND = 5					// number of dendrite nodes
-	    para_dend1 = (NDEND)*2 - 1		// number of small periaxonal comaprtments
+	    para_dend1 = (NDEND)*2 - 1	// number of small periaxonal comaprtments
 	    para_dend2 = (NDEND)*2 - 1	// number of large periaxonal comaprtments
 	    dendinter= (NDEND-1)*6		// number of dendrite internode compartments
 	    dendtotal= NDEND+ax_paraD1+ax_paraD2+dendinter
@@ -127,20 +127,19 @@ load_proc("nrnmainmenu")
 		dend_Rpn2=(rhoa*.01)/(PI*((((dend_paraD2/2)+space_p2)^2)-((dend_paraD2/2)^2)))
 		dend_Rpx=(rhoa*.01)/(PI*((((D_dend/2)+space_i)^2)-((D_dend/2)^2)))
 		dend_interlength=(INL_dend-nodelength-(2*paralength1)-(2*paralength2))/6
-*/
 
 // Soma ------------------------------------------------------------------------
 	D_soma = 10					// soma diamter [um]
 	INL_soma = 20				// soma internodal length [um]
-	soma_paraD1 = 1.004
-	soma_paraD2 = 10.008
-	nl = 80
+	soma_paraD1 = 10.004 		// diameter of periaxonal space [um]
+	soma_paraD2 = 10.008		// diameter of periaxonal space [um]
+	nl = 80				   	    // number of myelin lamella
 
 	// topological parameters
 		NSOMA = 1
-		para_soma1 = NSOMA*2
-		para_soma2 = NSOMA*2
-		somainter = NSOMA*6
+		para_soma1 = NSOMA*3
+		para_soma2 = NSOMA*3
+		somainter = NSOMA*12
 		somatotal = NSOMA + para_soma1 + para_soma2 + somainter
 
 		soma_Rpn0=(rhoa*.01)/(PI*((((D_soma/2)+space_p1)^2)-((D_soma/2)^2)))
