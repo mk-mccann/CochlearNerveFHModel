@@ -36,7 +36,7 @@
                 
 %% Draw Distance to Electrode Curve:
     angle = 15;
-    DistanceToElectrode = 1000; % [um]
+    DistanceToElectrode = 500; % [um]
     Distance_xvalues = zeros(1, DendriteNodes);
     Distance_yvalues = zeros(1, DendriteNodes);
     
