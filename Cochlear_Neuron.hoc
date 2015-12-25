@@ -131,8 +131,8 @@ load_proc("nrnmainmenu")
 // Soma ------------------------------------------------------------------------
 	D_soma = 10					// soma diamter [um]
 	INL_soma = 20				// soma internodal length [um]
-	soma_paraD1 = 10.004 		// diameter of periaxonal space [um]
-	soma_paraD2 = 10.008		// diameter of periaxonal space [um]
+	soma_paraD1 = 2.004 		// diameter of periaxonal space [um]
+	soma_paraD2 = 2.008		// diameter of periaxonal space [um]
 	nl = 80				   	    // number of myelin lamella
 
 	// topological parameters
